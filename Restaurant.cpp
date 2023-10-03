@@ -46,16 +46,41 @@ public:
 		switch (pos)
 		{
 		case CLOCKWISE:
+			if (current->next == nullptr) {
+				current->next = add;
+				add->prev = current;
+				add->next = nullptr;
+			}
+			else {
+				customer *temp = current->next;
+				current->next = add;
+				add->prev = current;
+				add->next = temp;
+				temp->prev = add;
+			}
 			break;
 		case ANTICLOCKWISE:
+			if (current->prev == nullptr) {
+				current->prev = add;
+				add->prev = nullptr;
+				add->next = current;
+			}
+			else {
+				customer *temp = current->prev;
+				current->prev = add;
+				add->next = current;
+				add->prev = temp;
+				temp->next = add;
+			}
 			break;
 		default:
 			break;
 		}
 	}
 
-	void addQueue(customer *add) // tail
+	void addQueue(customer *add) // add tail
 	{
+
 	}
 
 	void RED(string name, int energy)
@@ -65,6 +90,7 @@ public:
 		if (table == nullptr)
 		{
 			table = new customer(name, energy, nullptr, nullptr);
+			return;
 		}
 		int size = countTable();
 		if (size < MAXSIZE / 2)
