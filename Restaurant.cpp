@@ -5,17 +5,35 @@ class imp_res : public Restaurant
 public:
 	customer *table = nullptr; // Doubly circular linked list represents the table
 	customer *queue = nullptr; // Doubly linked list presents the queue
-	imp_res(){};
-	int customerAmount(customer *a) // use to calculate both table amount and queue amount
+	enum position
 	{
-		if (a == nullptr)
+		CLOCKWISE = 0,
+		ANTICLOCKWISE
+	};
+	imp_res(){};
+	int countTable()
+	{
+		if (table == nullptr)
 			return 0;
-		if (a->next == nullptr && a->prev == nullptr)
+		if (table->next == nullptr && table->prev == nullptr)
 			return 1;
-		customer *temp = a;
+		customer *temp = table;
 		int result = 1;
 		temp = temp->next;
-		while (temp->name != a->name)
+		while (temp->name != table->name)
+		{
+			result++;
+			temp = temp->next;
+		}
+		return result;
+	}
+	int countQueue()
+	{
+		if (queue == nullptr)
+			return 0;
+		customer *temp = queue;
+		int result = 0;
+		while (temp != nullptr)
 		{
 			result++;
 			temp = temp->next;
@@ -23,8 +41,21 @@ public:
 		return result;
 	}
 
-	void addCustomer(customer *list, customer *need, int position = 0)
-	{ // use to add customer in table or queue
+	void addTable(customer *current, customer *add, position pos)
+	{
+		switch (pos)
+		{
+		case CLOCKWISE:
+			break;
+		case ANTICLOCKWISE:
+			break;
+		default:
+			break;
+		}
+	}
+
+	void addQueue(customer *add) // tail
+	{
 	}
 
 	void RED(string name, int energy)
@@ -35,7 +66,7 @@ public:
 		{
 			table = new customer(name, energy, nullptr, nullptr);
 		}
-		int size = customerAmount(table);
+		int size = countTable();
 		if (size < MAXSIZE / 2)
 		{
 		}
