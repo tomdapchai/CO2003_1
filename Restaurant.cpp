@@ -4,8 +4,8 @@ class imp_res : public Restaurant
 {
 public:
 	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position. Or is it?
-	customer *queue = nullptr;	// Doubly linked list presents the queue
-	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as stack
+	customer *queue = nullptr;	// Doubly linked list presents the queue, always points to head of the queue.
+	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point at the head.
 	enum position
 	{
 		DEFAULT = 0,
@@ -13,36 +13,11 @@ public:
 		ANTICLOCKWISE
 	};
 	imp_res(){};
-	int countTable()
-	{
-		if (table == nullptr)
-			return 0;
-		if (table->next == nullptr && table->prev == nullptr)
-			return 1;
-		customer *temp = table;
-		int result = 0;
-		while (temp->next != table)
-		{
-			result++;
-			temp = temp->next;
-		}
-		return result;
-	}
-	int countQueue()
-	{
-		if (queue == nullptr)
-			return 0;
-		customer *temp = queue;
-		int result = 0;
-		while (temp != nullptr)
-		{
-			result++;
-			temp = temp->next;
-		}
-		return result;
-	}
+	int sizeTable = 0;
+	int sizeQueue = 0;
 
-	void addRecent(string name, int energy) // add head
+	void
+	addRecent(string name, int energy) // add tail
 	{
 		if (recent == nullptr)
 		{
@@ -106,6 +81,7 @@ public:
 			break;
 		}
 		addRecent(name, energy);
+		++sizeTable;
 	}
 
 	void addQueue(string name, int energy) // add tail
@@ -122,7 +98,9 @@ public:
 				temp = temp->next;
 			}
 			customer *add = new customer(name, energy, temp, nullptr);
+			temp->next = add;
 		}
+		++sizeQueue;
 	}
 
 	void RED(string name, int energy)
@@ -135,12 +113,18 @@ public:
 			if (name == temp->name)
 				return;
 		}
+		temp = queue;
+		while (temp != nullptr)
+		{
+			if (name == temp->name)
+				return;
+		}
+		delete temp;
 		if (table == nullptr)
 		{
 			addTable(name, energy);
 			return;
 		}
-		int sizeTable = countTable();
 		if (sizeTable < MAXSIZE / 2)
 		{
 			if (energy >= table->energy)
@@ -157,8 +141,8 @@ public:
 			{
 				if (abs(abs(energy) - abs(temp->energy)) > absRES)
 				{
-					absRES = abs(energy - temp->energy);
-					RES = energy - temp->energy;
+					absRES = abs(abs(energy) - abs(temp->energy));
+					RES = abs(energy) - abs(temp->energy);
 					customer *tempTable = table;
 					table = temp;
 				}
@@ -171,7 +155,7 @@ public:
 		}
 		else
 		{
-			if (countQueue() >= MAXSIZE)
+			if (sizeQueue >= MAXSIZE)
 				return;
 			else
 			{
@@ -204,17 +188,38 @@ public:
 		delete temp;
 	}
 
+	void removeQueue()
+	{
+		if (queue == nullptr)
+		{
+			cout << "no queue \n";
+			return;
+		}
+		if (queue->next == nullptr)
+		{
+			queue = nullptr;
+			sizeQueue = 0;
+			return;
+		}
+		customer *temp = queue;
+		queue = queue->next;
+		queue->prev = nullptr;
+		--sizeQueue;
+		delete temp;
+	}
+
 	void BLUE(int num)
 	{
-		if (num >= countTable())
+		if (num >= sizeTable)
 		{
-			for (int i = 0; i < countTable() - 1; i++)
+			for (int i = 0; i < sizeTable - 1; i++)
 				table = table->next;
 			delete table;
 			table = nullptr;
+			sizeTable = 0;
 			return;
 		}
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) // remove recent got in table - delete in table
 		{
 			customer *remove = findCustomer(recent->name);
 			customer *removePrev = remove->prev;
@@ -222,39 +227,94 @@ public:
 			removePrev->next = removeNext;
 			removeNext->prev = removePrev;
 			delete remove;
+			--sizeTable;
 			removeRecent();
+		}
+
+		if (sizeQueue == 0)
+			return;
+
+		while (sizeTable < MAXSIZE || queue != nullptr)
+		{
+			RED(queue->name, queue->energy);
+			removeQueue();
 		}
 		cout << "blue " << num << endl;
 	}
 
-	void swapCustomer(customer *&one, customer *&two)
+	void swapCustomer(customer *one, customer *two)
 	{ // use for swapping in shell sort
-		if (one->next == two || two->next == one)
+		if (one == two || one->name == two->name)
+			return;
+		if (one->next == two || two->next == one) // adjacent
 		{
-			customer *temp = one;
-			one = two;
-			two = temp;
+			bool head = false;
+			if (one->next == two)
+			{
+				customer *tempOnePrev = one->prev;
+				customer *tempTwoNext = two->next;
+				if (tempOnePrev == nullptr)
+					head = true;
+				else
+					tempOnePrev->next = two;
+				two->prev = tempOnePrev;
+				two->next = one;
+				if (tempTwoNext != nullptr)
+					tempTwoNext->prev = one;
+				one->next = tempTwoNext;
+				one->prev = two;
+				if (head)
+					queue = two;
+			}
+			else
+			{
+				customer *tempOneNext = one->next;
+				customer *tempTwoPrev = two->prev;
+				if (tempOneNext != nullptr)
+					tempOneNext->prev = two;
+				two->next = tempOneNext;
+				two->prev = one;
+				if (tempTwoPrev == nullptr)
+					head = true;
+				else
+					tempTwoPrev->next = one;
+				one->prev = tempTwoPrev;
+				one->next = two;
+				if (head)
+					queue = one;
+			}
 			return;
 		}
+
+		bool head1 = false;
+		bool head2 = false;
 
 		customer *tempOnePrev = one->prev;
 		customer *tempOneNext = one->next;
 		customer *tempTwoPrev = two->prev;
 		customer *tempTwoNext = two->next;
 
-		if (tempOnePrev != nullptr)
+		if (tempOnePrev == nullptr)
+			head1 = true;
+		else
 			tempOnePrev->next = two;
 		if (tempOneNext != nullptr)
 			tempOneNext->prev = two;
 		two->prev = tempOnePrev;
 		two->next = tempOneNext;
 
-		if (tempTwoPrev != nullptr)
+		if (tempTwoPrev == nullptr)
+			head2 = true;
+		else
 			tempTwoPrev->next = one;
 		if (tempTwoNext != nullptr)
 			tempTwoNext->prev = one;
 		one->prev = tempTwoPrev;
 		one->next = tempTwoNext;
+		if (head1)
+			queue = two;
+		if (head2)
+			queue = one;
 	}
 
 	void PURPLE()
@@ -263,7 +323,7 @@ public:
 		int pos;
 		int largestEnergy = 0;
 		customer *temp = queue;
-		for (int i = 0; i < countQueue(); i++)
+		for (int i = 0; i < sizeQueue; i++)
 		{
 			if (abs(temp->energy) >= largestEnergy)
 			{
