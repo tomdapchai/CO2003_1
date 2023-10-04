@@ -155,7 +155,7 @@ public:
 			customer *temp = table;
 			while (temp->next != table)
 			{
-				if (abs(energy - temp->energy) > absRES)
+				if (abs(abs(energy) - abs(temp->energy)) > absRES)
 				{
 					absRES = abs(energy - temp->energy);
 					RES = energy - temp->energy;
