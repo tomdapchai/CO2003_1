@@ -20,8 +20,27 @@ public:
 	int sizeTable = 0;
 	int sizeQueue = 0;
 
-	void
-	addRecent(string name, int energy) // add tail
+	void add(customer *&head, string name, int energy, bool isQueue = false)
+	{ // add tail
+		if (head == nullptr)
+		{
+			head = new customer(name, energy, nullptr, nullptr);
+		}
+		else
+		{
+			customer *temp = head;
+			while (temp->next != nullptr)
+			{
+				temp = temp->next;
+			}
+			customer *add = new customer(name, energy, temp, nullptr);
+			temp->next = add;
+		}
+		if (isQueue)
+			++sizeQueue;
+	}
+
+	/* void addRecent(string name, int energy) // add tail
 	{
 		if (recent == nullptr)
 		{
@@ -36,7 +55,7 @@ public:
 			}
 			customer *add = new customer(name, energy, temp, nullptr);
 		}
-	}
+	} */
 
 	void addTable(string name, int energy, position pos = DEFAULT)
 	{
@@ -84,11 +103,11 @@ public:
 			table = new customer(name, energy, nullptr, nullptr);
 			break;
 		}
-		addRecent(name, energy);
+		add(recent, name, energy);
 		++sizeTable;
 	}
 
-	void addQueue(string name, int energy) // add tail
+	/* void addQueue(string name, int energy) // add tail
 	{
 		if (queue == nullptr)
 		{
@@ -105,7 +124,7 @@ public:
 			temp->next = add;
 		}
 		++sizeQueue;
-	}
+	} */
 
 	void RED(string name, int energy)
 	{
@@ -174,7 +193,7 @@ public:
 				return;
 			else
 			{
-				addQueue(name, energy);
+				add(queue, name, energy, true);
 			}
 		}
 		cout << name << " " << energy << endl;
@@ -231,7 +250,11 @@ public:
 		if (num >= sizeTable)
 		{
 			for (int i = 0; i < sizeTable - 1; i++)
+			{
+				customer *temp = table;
 				table = table->next;
+				delete temp;
+			}
 			delete table;
 			table = nullptr;
 			sizeTable = 0;
@@ -261,8 +284,8 @@ public:
 		cout << "blue " << num << endl;
 	}
 
-	void swapCustomer(customer *one, customer *two)
-	{ // use for swapping in shell sort or in table
+	void swapCustomer(customer *one, customer *two) // later
+	{												// use for swapping in shell sort or in table
 		if (one == two || one->name == two->name)
 			return;
 		if (one->next == two || two->next == one) // adjacent
@@ -336,20 +359,20 @@ public:
 			queue = one;
 	}
 
-	customer *getElementQueue(int index)
+	customer *getCustomer(customer *head, int index, bool isQueue = false)
 	{
-		if (index < 0 || index >= sizeQueue)
+		//
+		if (isQueue)
 		{
-			cout << "out of index";
-			return nullptr;
+			if (index < 0 || index >= sizeQueue)
+			{
+				cout << "out of index";
+				return nullptr;
+			}
 		}
-		if (index == 0)
-			return queue;
-		customer *temp = queue;
+		customer *temp = head;
 		for (int i = 0; i < index; i++)
-		{
 			temp = temp->next;
-		}
 		return temp;
 	}
 
@@ -375,9 +398,9 @@ public:
 		{
 			for (int i = gap; i <= pos; i++)
 			{
-				for (int j = i; j >= gap && getElementQueue(j - gap)->energy > getElementQueue(j)->energy; j -= gap)
+				for (int j = i; j >= gap && getCustomer(queue, j - gap, true)->energy > getCustomer(queue, j, true)->energy; j -= gap)
 				{
-					swapCustomer(getElementQueue(j), getElementQueue(j - gap));
+					swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
 					N++;
 				}
 			}
@@ -391,6 +414,61 @@ public:
 	void REVERSAL()
 	{
 		// split into two part: positive energy and negative energy, reverse each part.
+		customer *headPos = nullptr;
+		customer *headNeg = nullptr;
+		customer *temp = table;
+		while (temp->prev != table)
+		{
+			if (temp->energy > 0)
+			{
+				add(headPos, temp->name, temp->energy);
+			}
+			else
+			{
+				add(headNeg, temp->name, temp->energy);
+			}
+			temp = temp->prev;
+		}
+		if (temp->energy > 0)
+		{
+			add(headPos, temp->name, temp->energy);
+		}
+		else
+		{
+			add(headNeg, temp->name, temp->energy);
+		}
+
+		int sizePos = 0, sizeNeg = 0;
+		customer *count = headPos;
+		while (count != nullptr)
+		{
+			sizePos++;
+			count = count->next;
+		}
+
+		count = headNeg;
+		while (count != nullptr)
+		{
+			sizeNeg++;
+			count = count->next;
+		}
+		delete count;
+
+		// swap positive energy
+		for (int i = 0; i < sizePos / 2; i++)
+		{
+			swapCustomer(findCustomer(getCustomer(headPos, i)->name), findCustomer(getCustomer(headPos, sizePos - 1 - i)->name));
+		}
+
+		// swap negative energy
+		for (int i = 0; i < sizeNeg / 2; i++)
+		{
+			swapCustomer(findCustomer(getCustomer(headNeg, i)->name), findCustomer(getCustomer(headNeg, sizeNeg - 1 - i)->name));
+		}
+		// done
+		/* delete headPos;
+		delete headNeg; */
+		// why can't I delete these two pointers even though they r not relate to table pointer lol. Wait they r somehow in the table @@
 		cout << "reversal" << endl;
 	}
 	void UNLIMITED_VOID()
@@ -404,5 +482,26 @@ public:
 	void LIGHT(int num)
 	{
 		cout << "light " << num << endl;
+	}
+	~imp_res()
+	{
+		for (int i = 0; i < sizeTable; i++)
+		{
+			customer *temp = table;
+			table = table->next;
+			delete temp;
+		}
+		while (queue != nullptr)
+		{
+			customer *temp = queue;
+			queue = queue->next;
+			delete temp;
+		}
+		while (recent != nullptr)
+		{
+			customer *temp = recent;
+			recent = recent->next;
+			delete temp;
+		}
 	}
 };
