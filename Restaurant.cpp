@@ -471,6 +471,7 @@ public:
 		// why can't I delete these two pointers even though they r not relate to table pointer lol. Wait they r somehow in the table @@
 		cout << "reversal" << endl;
 	}
+
 	void UNLIMITED_VOID()
 	{
 		cout << "unlimited_void" << endl;
@@ -481,6 +482,35 @@ public:
 	}
 	void LIGHT(int num)
 	{
+		if (num > 0)
+		{
+			customer *temp = table;
+			while (temp->next != table)
+			{
+				cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->next;
+			}
+			cout << temp->name << "-" << temp->energy << endl;
+		}
+		else if (num == 0)
+		{
+			customer *temp = queue;
+			while (temp != nullptr)
+			{
+				cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->next;
+			}
+		}
+		else
+		{
+			customer *temp = table;
+			while (temp->prev != table)
+			{
+				cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->prev;
+			}
+			cout << temp->name << "-" << temp->energy << endl;
+		}
 		cout << "light " << num << endl;
 	}
 	~imp_res()
