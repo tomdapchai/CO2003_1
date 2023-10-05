@@ -474,8 +474,11 @@ public:
 
 	void UNLIMITED_VOID()
 	{
+		if (sizeTable < 4)
+			return;
 		cout << "unlimited_void" << endl;
 	}
+
 	void DOMAIN_EXPANSION()
 	{
 		cout << "domain_expansion" << endl;
