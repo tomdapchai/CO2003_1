@@ -3,15 +3,19 @@
 class imp_res : public Restaurant
 {
 public:
-	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position. Or is it?
+	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position.
 	customer *queue = nullptr;	// Doubly linked list presents the queue, always points to head of the queue.
-	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point at the head.
+	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point to the head.
 	enum position
 	{
 		DEFAULT = 0,
 		CLOCKWISE,
 		ANTICLOCKWISE
 	};
+	/*
+	next is CLOCKWISE
+	prev is ANTICLOCKWISE
+	*/
 	imp_res(){};
 	int sizeTable = 0;
 	int sizeQueue = 0;
@@ -113,6 +117,9 @@ public:
 			if (name == temp->name)
 				return;
 		}
+		// temp is currently table->prev
+		if (name == temp->name)
+			return;
 		temp = queue;
 		while (temp != nullptr)
 		{
@@ -147,6 +154,14 @@ public:
 					table = temp;
 				}
 				temp = temp->next;
+			}
+			// temp is currently table->prev
+			if (abs(abs(energy) - abs(temp->energy)) > absRES)
+			{
+				absRES = abs(abs(energy) - abs(temp->energy));
+				RES = abs(energy) - abs(temp->energy);
+				customer *tempTable = table;
+				table = temp;
 			}
 			if (RES < 0)
 				addTable(name, energy, ANTICLOCKWISE);
@@ -210,6 +225,9 @@ public:
 
 	void BLUE(int num)
 	{
+		if (num == 0)
+			return;
+
 		if (num >= sizeTable)
 		{
 			for (int i = 0; i < sizeTable - 1; i++)
@@ -219,6 +237,7 @@ public:
 			sizeTable = 0;
 			return;
 		}
+
 		for (int i = 0; i < num; i++) // remove recent got in table - delete in table
 		{
 			customer *remove = findCustomer(recent->name);
@@ -243,7 +262,7 @@ public:
 	}
 
 	void swapCustomer(customer *one, customer *two)
-	{ // use for swapping in shell sort
+	{ // use for swapping in shell sort or in table
 		if (one == two || one->name == two->name)
 			return;
 		if (one->next == two || two->next == one) // adjacent
@@ -263,7 +282,7 @@ public:
 					tempTwoNext->prev = one;
 				one->next = tempTwoNext;
 				one->prev = two;
-				if (head)
+				if (head) // only queue has head
 					queue = two;
 			}
 			else
@@ -317,6 +336,23 @@ public:
 			queue = one;
 	}
 
+	customer *getElementQueue(int index)
+	{
+		if (index < 0 || index >= sizeQueue)
+		{
+			cout << "out of index";
+			return nullptr;
+		}
+		if (index == 0)
+			return queue;
+		customer *temp = queue;
+		for (int i = 0; i < index; i++)
+		{
+			temp = temp->next;
+		}
+		return temp;
+	}
+
 	void PURPLE()
 	{
 		int N = 0;
@@ -334,11 +370,27 @@ public:
 		}
 		// Perform shell sort from positon 0 to pos on the queue.
 
+		int gap = (pos + 1) / 2;
+		while (gap > 0)
+		{
+			for (int i = gap; i <= pos; i++)
+			{
+				for (int j = i; j >= gap && getElementQueue(j - gap)->energy > getElementQueue(j)->energy; j -= gap)
+				{
+					swapCustomer(getElementQueue(j), getElementQueue(j - gap));
+					N++;
+				}
+			}
+			gap /= 2;
+		}
+
 		BLUE(N);
 		cout << "purple" << endl;
 	}
+
 	void REVERSAL()
 	{
+		// split into two part: positive energy and negative energy, reverse each part.
 		cout << "reversal" << endl;
 	}
 	void UNLIMITED_VOID()
