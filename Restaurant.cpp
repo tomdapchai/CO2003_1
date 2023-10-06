@@ -205,7 +205,7 @@ public:
 	}
 
 	void removeRecent()
-	{
+	{ // remove head
 		if (recent == nullptr)
 		{
 			cout << "no recent \n";
@@ -259,14 +259,25 @@ public:
 		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
 		{
 			customer *remove = findCustomer(recent->name);
+			if (remove->energy > 0)
+			{ // not this, must be a temp to store old table data
+				if (remove != table)
+					customer *temp = table;
+				table = remove->next;
+			}
+			// need to handle the case remove == table
+			else
+			{
+				if (remove != table)
+					customer *temp = table;
+				table = remove->prev;
+			}
+
 			customer *removePrev = remove->prev;
 			customer *removeNext = remove->next;
 			removePrev->next = removeNext;
 			removeNext->prev = removePrev;
-			if (remove->energy > 0)
-				table = removeNext;
-			else
-				table = removePrev;
+
 			delete remove;
 			--sizeTable;
 			removeRecent();
@@ -538,6 +549,27 @@ public:
 
 	void DOMAIN_EXPANSION()
 	{
+		int ePos = 0;
+		int eNeg = 0;
+		customer *temp = table;
+		while (1)
+		{
+			if (temp->energy > 0)
+				ePos += temp->energy;
+			else
+				eNeg += abs(temp->energy);
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
+		if (ePos >= eNeg)
+		{
+			//
+		}
+		else
+		{
+			//
+		}
 		cout << "domain_expansion" << endl;
 	}
 
