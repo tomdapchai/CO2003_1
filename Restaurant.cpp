@@ -131,14 +131,15 @@ public:
 		if (energy == 0 || MAXSIZE == 0)
 			return;
 		customer *temp = table;
-		while (temp->next != table)
+		while (1)
 		{
 			if (name == temp->name)
 				return;
+			temp = temp->next;
+			if (temp == table)
+				break;
 		}
 		// temp is currently table->prev
-		if (name == temp->name)
-			return;
 		temp = queue;
 		while (temp != nullptr)
 		{
@@ -163,7 +164,7 @@ public:
 			int absRES = 0;
 			int RES;
 			customer *temp = table;
-			while (temp->next != table)
+			while (1)
 			{
 				if (abs(abs(energy) - abs(temp->energy)) > absRES)
 				{
@@ -173,14 +174,8 @@ public:
 					table = temp;
 				}
 				temp = temp->next;
-			}
-			// temp is currently table->prev
-			if (abs(abs(energy) - abs(temp->energy)) > absRES)
-			{
-				absRES = abs(abs(energy) - abs(temp->energy));
-				RES = abs(energy) - abs(temp->energy);
-				customer *tempTable = table;
-				table = temp;
+				if (temp == table)
+					break;
 			}
 			if (RES < 0)
 				addTable(name, energy, ANTICLOCKWISE);
@@ -261,13 +256,17 @@ public:
 			return;
 		}
 
-		for (int i = 0; i < num; i++) // remove recent got in table - delete in table
+		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
 		{
 			customer *remove = findCustomer(recent->name);
 			customer *removePrev = remove->prev;
 			customer *removeNext = remove->next;
 			removePrev->next = removeNext;
 			removeNext->prev = removePrev;
+			if (remove->energy > 0)
+				table = removeNext;
+			else
+				table = removePrev;
 			delete remove;
 			--sizeTable;
 			removeRecent();
@@ -476,6 +475,64 @@ public:
 	{
 		if (sizeTable < 4)
 			return;
+		if (sizeTable == 4)
+		{
+			// idk if i have to print 4 times or not, do this later
+			customer *temp = table;
+			while (1)
+			{
+				cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->next;
+				if (temp == table)
+					break;
+			}
+			return;
+		}
+
+		customer *temp = table;
+
+		while (1)
+		{
+			string Name = temp->name;
+			customer *sumList = nullptr;
+			int sum = 0;
+			customer *sumTemp = temp;
+			for (int i = 0; i < 4; i++)
+			{
+				sum += sumTemp->energy;
+				sumTemp = sumTemp->next;
+			}
+			// sumList is the list of all sum of subsequences start from temp
+			add(sumList, Name, sum); // head
+			while (1)
+			{
+				sum += sumTemp->energy;
+				add(sumList, Name, sum);
+				sumTemp = sumTemp->next;
+				if (sumTemp == temp)
+					break;
+			}
+
+			int minSum = __INT32_MAX__;
+			int length;
+			for (int i = 0; i < sizeTable - 4 + 1 || sumList != nullptr; i++)
+			{
+				if (sumList->energy >= minSum)
+					length = sizeTable - i - 1;
+				sumList = sumList->next;
+			}
+			delete sumList;
+			/*********/
+			customer *print = temp;
+			for (int i = 0; i < length; i++)
+			{
+				cout << print->name << "-" << print->energy << endl;
+				print = print->next;
+			}
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 		cout << "unlimited_void" << endl;
 	}
 
@@ -483,17 +540,19 @@ public:
 	{
 		cout << "domain_expansion" << endl;
 	}
+
 	void LIGHT(int num)
 	{
 		if (num > 0)
 		{
 			customer *temp = table;
-			while (temp->next != table)
+			while (1)
 			{
 				cout << temp->name << "-" << temp->energy << endl;
 				temp = temp->next;
+				if (temp == table)
+					break;
 			}
-			cout << temp->name << "-" << temp->energy << endl;
 		}
 		else if (num == 0)
 		{
