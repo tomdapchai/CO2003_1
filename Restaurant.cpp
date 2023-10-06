@@ -541,7 +541,7 @@ public:
 		cout << "reversal" << endl;
 	}
 
-	void UNLIMITED_VOID()
+	void UNLIMITED_VOID() // need fix like the orginal idea, find the longest sub with min sum, create a list to contains all min sum of each customer, then compare, then choose the one that meets the requirement, then print out.
 	{
 		if (sizeTable < 4)
 			return;
@@ -608,6 +608,12 @@ public:
 
 		temp = nullptr;
 		delete temp;
+
+		while (sizeTable < MAXSIZE || queue != nullptr)
+		{
+			RED(queue->name, queue->energy);
+			remove(queue, nullptr, true);
+		}
 		cout << "unlimited_void" << endl;
 	}
 
