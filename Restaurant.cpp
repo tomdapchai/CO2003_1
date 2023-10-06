@@ -238,7 +238,6 @@ public:
 		{
 			if (head == table) // table
 			{
-				//
 				if (r->energy > 0)
 					head = r->next;
 				else
@@ -251,7 +250,6 @@ public:
 			}
 			else // queue or recent
 			{
-				//
 				if (r->next == nullptr)
 				{
 					r->prev->next = nullptr;
@@ -617,6 +615,7 @@ public:
 	{
 		int ePos = 0;
 		int eNeg = 0;
+
 		customer *temp = table;
 		while (1)
 		{
@@ -637,84 +636,44 @@ public:
 				eNeg += abs(temp->energy);
 			temp = temp->next;
 		}
+		// Print the removed customers
+		temp = recent;
+		while (temp->next != nullptr)
+			temp = temp->next;
+		// temp : tail = most recent
+		while (temp != nullptr)
+		{
+			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+				cout << temp->name << "-" << temp->energy << endl;
+			temp = temp->prev;
+		}
+		// Start removing
+		temp = table;
+		while (1)
+		{
+			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+			{
+				remove(recent, findCustomer(recent, temp->name));
+				remove(table, temp);
+			}
+
+			temp = temp->next;
+			if (temp == table)
+			{
+				temp = nullptr;
+				delete temp;
+				break;
+			}
+		}
+		temp = queue;
+		while (temp != nullptr)
+		{
+			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+				remove(queue, temp, true);
+			temp = temp->next;
+		}
 		delete temp;
 
-		if (ePos >= eNeg)
-		{
-			customer *temp = recent;
-			while (temp->next != nullptr)
-				temp = temp->next;
-			// temp : tail = most recent
-			while (temp != nullptr)
-			{
-				if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
-					cout << temp->name << "-" << temp->energy << endl;
-				temp = temp->prev;
-			}
-			temp = table;
-			while (1)
-			{
-				if (temp->energy < 0)
-				{
-					remove(recent, findCustomer(recent, temp->name));
-					remove(table, temp);
-				}
-
-				temp = temp->next;
-				if (temp == table)
-				{
-					temp = nullptr;
-					delete temp;
-					break;
-				}
-			}
-			temp = queue;
-			while (temp != nullptr)
-			{
-				if (temp->energy < 0)
-					remove(queue, temp, true);
-				temp = temp->next;
-			}
-			delete temp;
-		}
-		else
-		{
-			customer *temp = recent;
-			while (temp->next != nullptr)
-				temp = temp->next;
-			// temp : tail = most recent
-			while (temp != nullptr)
-			{
-				if (temp->energy > 0)
-					cout << temp->name << "-" << temp->energy << endl;
-				temp = temp->prev;
-			}
-			temp = table;
-			while (1)
-			{
-				if (temp->energy > 0)
-				{
-					remove(recent, findCustomer(recent, temp->name));
-					remove(table, temp);
-				}
-
-				temp = temp->next;
-				if (temp == table)
-				{
-					temp = nullptr;
-					delete temp;
-					break;
-				}
-			}
-			temp = queue;
-			while (temp != nullptr)
-			{
-				if (temp->energy > 0)
-					remove(queue, temp, true);
-				temp = temp->next;
-			}
-			delete temp;
-		}
 		cout << "domain_expansion" << endl;
 	}
 
