@@ -194,9 +194,9 @@ public:
 		cout << name << " " << energy << endl;
 	}
 
-	customer *findCustomer(string name)
+	customer *findCustomer(customer *head, string name)
 	{
-		customer *temp = table;
+		customer *temp = head;
 		while (temp->name != name)
 		{
 			temp = temp->next;
@@ -204,7 +204,71 @@ public:
 		return temp;
 	}
 
-	void removeRecent()
+	void remove(customer *&head, customer *r = nullptr, bool isQueue = false)
+	{
+		if (head->next == nullptr && head->prev == nullptr)
+		{
+			delete head;
+			return;
+		}
+		if (r == nullptr || (r == queue || r == recent)) // queue and recent use, remove head
+		{
+			if (head == nullptr)
+			{
+				cout << "empty \n";
+				return;
+			}
+			if (isQueue)
+			{
+				if (head->next == nullptr)
+				{
+					head = nullptr;
+					sizeQueue = 0;
+					return;
+				}
+			}
+			customer *temp = head;
+			head = head->next;
+			head->prev = nullptr;
+			delete temp;
+			if (isQueue)
+				--sizeQueue;
+		}
+		else // remove other places
+		{
+			if (head == table) // table
+			{
+				//
+				if (r->energy > 0)
+					head = r->next;
+				else
+					head = r->prev;
+
+				r->prev->next = r->next;
+				r->next->prev = r->prev;
+
+				--sizeTable;
+			}
+			else // queue or recent
+			{
+				//
+				if (r->next == nullptr)
+				{
+					r->prev->next = nullptr;
+					r = r->next;
+				}
+				else
+				{
+					r->prev->next = r->next;
+					r->next->prev = r->prev;
+				}
+				if (isQueue)
+					--sizeQueue;
+			}
+		}
+	}
+
+	/* void removeRecent()
 	{ // remove head
 		if (recent == nullptr)
 		{
@@ -235,7 +299,7 @@ public:
 		queue->prev = nullptr;
 		--sizeQueue;
 		delete temp;
-	}
+	} */
 
 	void BLUE(int num)
 	{
@@ -258,29 +322,21 @@ public:
 
 		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
 		{
-			customer *remove = findCustomer(recent->name);
-			if (remove->energy > 0)
-			{ // not this, must be a temp to store old table data
-				if (remove != table)
-					customer *temp = table;
-				table = remove->next;
-			}
-			// need to handle the case remove == table
+			customer *removePtr = findCustomer(table, recent->name);
+			// locate where table points to
+			if (removePtr->energy > 0)
+				table = removePtr->next;
 			else
-			{
-				if (remove != table)
-					customer *temp = table;
-				table = remove->prev;
-			}
+				table = removePtr->prev;
 
-			customer *removePrev = remove->prev;
-			customer *removeNext = remove->next;
-			removePrev->next = removeNext;
-			removeNext->prev = removePrev;
+			removePtr->prev->next = removePtr->next;
+			removePtr->next->prev = removePtr->prev;
 
-			delete remove;
+			removePtr = nullptr; // why
+			delete removePtr;
+
 			--sizeTable;
-			removeRecent();
+			remove(recent);
 		}
 
 		if (sizeQueue == 0)
@@ -289,7 +345,7 @@ public:
 		while (sizeTable < MAXSIZE || queue != nullptr)
 		{
 			RED(queue->name, queue->energy);
-			removeQueue();
+			remove(queue, nullptr, true);
 		}
 		cout << "blue " << num << endl;
 	}
@@ -448,6 +504,9 @@ public:
 			add(headNeg, temp->name, temp->energy);
 		}
 
+		temp = nullptr;
+		delete temp;
+
 		int sizePos = 0, sizeNeg = 0;
 		customer *count = headPos;
 		while (count != nullptr)
@@ -467,17 +526,19 @@ public:
 		// swap positive energy
 		for (int i = 0; i < sizePos / 2; i++)
 		{
-			swapCustomer(findCustomer(getCustomer(headPos, i)->name), findCustomer(getCustomer(headPos, sizePos - 1 - i)->name));
+			swapCustomer(findCustomer(table, getCustomer(headPos, i)->name), findCustomer(table, getCustomer(headPos, sizePos - 1 - i)->name));
 		}
 
 		// swap negative energy
 		for (int i = 0; i < sizeNeg / 2; i++)
 		{
-			swapCustomer(findCustomer(getCustomer(headNeg, i)->name), findCustomer(getCustomer(headNeg, sizeNeg - 1 - i)->name));
+			swapCustomer(findCustomer(table, getCustomer(headNeg, i)->name), findCustomer(table, getCustomer(headNeg, sizeNeg - 1 - i)->name));
 		}
 		// done
-		/* delete headPos;
-		delete headNeg; */
+		headPos = nullptr;
+		headNeg = nullptr;
+		delete headPos;
+		delete headNeg;
 		// why can't I delete these two pointers even though they r not relate to table pointer lol. Wait they r somehow in the table @@
 		cout << "reversal" << endl;
 	}
@@ -524,6 +585,8 @@ public:
 					break;
 			}
 
+			sumTemp = nullptr;
+			delete sumTemp;
 			int minSum = __INT32_MAX__;
 			int length;
 			for (int i = 0; i < sizeTable - 4 + 1 || sumList != nullptr; i++)
@@ -544,6 +607,9 @@ public:
 			if (temp == table)
 				break;
 		}
+
+		temp = nullptr;
+		delete temp;
 		cout << "unlimited_void" << endl;
 	}
 
@@ -562,13 +628,92 @@ public:
 			if (temp == table)
 				break;
 		}
+		temp = queue;
+		while (temp != nullptr)
+		{
+			if (temp->energy > 0)
+				ePos += temp->energy;
+			else
+				eNeg += abs(temp->energy);
+			temp = temp->next;
+		}
+		delete temp;
+
 		if (ePos >= eNeg)
 		{
-			//
+			customer *temp = recent;
+			while (temp->next != nullptr)
+				temp = temp->next;
+			// temp : tail = most recent
+			while (temp != nullptr)
+			{
+				if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+					cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->prev;
+			}
+			temp = table;
+			while (1)
+			{
+				if (temp->energy < 0)
+				{
+					remove(recent, findCustomer(recent, temp->name));
+					remove(table, temp);
+				}
+
+				temp = temp->next;
+				if (temp == table)
+				{
+					temp = nullptr;
+					delete temp;
+					break;
+				}
+			}
+			temp = queue;
+			while (temp != nullptr)
+			{
+				if (temp->energy < 0)
+					remove(queue, temp, true);
+				temp = temp->next;
+			}
+			delete temp;
 		}
 		else
 		{
-			//
+			customer *temp = recent;
+			while (temp->next != nullptr)
+				temp = temp->next;
+			// temp : tail = most recent
+			while (temp != nullptr)
+			{
+				if (temp->energy > 0)
+					cout << temp->name << "-" << temp->energy << endl;
+				temp = temp->prev;
+			}
+			temp = table;
+			while (1)
+			{
+				if (temp->energy > 0)
+				{
+					remove(recent, findCustomer(recent, temp->name));
+					remove(table, temp);
+				}
+
+				temp = temp->next;
+				if (temp == table)
+				{
+					temp = nullptr;
+					delete temp;
+					break;
+				}
+			}
+			temp = queue;
+			while (temp != nullptr)
+			{
+				if (temp->energy > 0)
+					remove(queue, temp, true);
+				temp = temp->next;
+			}
+			delete temp;
 		}
 		cout << "domain_expansion" << endl;
 	}
