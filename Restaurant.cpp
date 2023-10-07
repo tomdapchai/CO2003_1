@@ -40,23 +40,6 @@ public:
 			++sizeQueue;
 	}
 
-	/* void addRecent(string name, int energy) // add tail
-	{
-		if (recent == nullptr)
-		{
-			recent = new customer(name, energy, nullptr, nullptr);
-		}
-		else
-		{
-			customer *temp = recent;
-			while (temp->next != nullptr)
-			{
-				temp = temp->next;
-			}
-			customer *add = new customer(name, energy, temp, nullptr);
-		}
-	} */
-
 	void addTable(string name, int energy, position pos = DEFAULT)
 	{
 		switch (pos)
@@ -106,25 +89,6 @@ public:
 		add(recent, name, energy);
 		++sizeTable;
 	}
-
-	/* void addQueue(string name, int energy) // add tail
-	{
-		if (queue == nullptr)
-		{
-			queue = new customer(name, energy, nullptr, nullptr);
-		}
-		else
-		{
-			customer *temp = queue;
-			while (temp->next != nullptr)
-			{
-				temp = temp->next;
-			}
-			customer *add = new customer(name, energy, temp, nullptr);
-			temp->next = add;
-		}
-		++sizeQueue;
-	} */
 
 	void RED(string name, int energy)
 	{
@@ -277,39 +241,6 @@ public:
 		}
 	}
 
-	/* void removeRecent()
-	{ // remove head
-		if (recent == nullptr)
-		{
-			cout << "no recent \n";
-			return;
-		}
-		customer *temp = recent;
-		recent = recent->next;
-		recent->prev = nullptr;
-		delete temp;
-	}
-
-	void removeQueue()
-	{
-		if (queue == nullptr)
-		{
-			cout << "no queue \n";
-			return;
-		}
-		if (queue->next == nullptr)
-		{
-			queue = nullptr;
-			sizeQueue = 0;
-			return;
-		}
-		customer *temp = queue;
-		queue = queue->next;
-		queue->prev = nullptr;
-		--sizeQueue;
-		delete temp;
-	} */
-
 	void BLUE(int num)
 	{
 		cout << "BLUE check \n";
@@ -370,8 +301,8 @@ public:
 		cout << "blue " << num << endl;
 	}
 
-	void swapCustomer(customer *one, customer *two) // later
-	{												// use for swapping in shell sort or in table
+	void swapCustomer(customer *one, customer *two)
+	{ // use for swapping in shell sort or in table
 		if (one == two || one->name == two->name)
 			return;
 		if (one->next == two || two->next == one) // adjacent
@@ -635,9 +566,6 @@ public:
 
 				tempTemp = tempTemp->next;
 			}
-			/* tempTemp->next = nullptr;
-			tempTemp->prev = nullptr;
-			delete tempTemp; */
 			// after the loop we now get the smallest sum with longest length possible, with the Name of customer holding that subsequence
 			/*********/
 			temp = temp->next;
@@ -677,10 +605,6 @@ public:
 			temp = temp->next;
 			--length;
 		}
-
-		/* temp->next = nullptr;
-		temp->prev = nullptr;
-		delete temp; */
 
 		// Add customer from queue
 		while (sizeTable < MAXSIZE && queue != nullptr)
