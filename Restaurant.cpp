@@ -240,7 +240,6 @@ public:
 			customer *temp = head;
 			head = head->next;
 			head->prev = nullptr;
-			temp->next = nullptr;
 			delete temp;
 			if (isQueue)
 				--sizeQueue;
@@ -274,6 +273,7 @@ public:
 				if (isQueue)
 					--sizeQueue;
 			}
+			delete r;
 		}
 	}
 
@@ -348,6 +348,15 @@ public:
 
 			--sizeTable;
 			remove(recent);
+		}
+
+		customer *temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
 		}
 
 		if (sizeQueue == 0)
@@ -722,30 +731,28 @@ public:
 		}
 		// Start removing
 		temp = table;
+
 		while (1)
 		{
-			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+			customer *tempTemp = temp;
+			temp = temp->next;
+			if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
 			{
-				remove(recent, findCustomer(recent, temp->name));
-				remove(table, temp);
+				remove(recent, findCustomer(recent, tempTemp->name));
+				remove(table, tempTemp);
 			}
 
-			temp = temp->next;
 			if (temp == table)
-			{
-				temp = nullptr;
-				delete temp;
 				break;
-			}
 		}
 		temp = queue;
 		while (temp != nullptr)
 		{
-			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
-				remove(queue, temp, true);
+			customer *tempTemp = temp;
 			temp = temp->next;
+			if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+				remove(queue, tempTemp, true);
 		}
-		delete temp;
 
 		temp = table;
 		while (1)
@@ -790,7 +797,6 @@ public:
 			}
 			cout << temp->name << "-" << temp->energy << endl;
 		}
-		cout << "light " << num << endl;
 	}
 	~imp_res()
 	{
