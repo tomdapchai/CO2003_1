@@ -145,6 +145,7 @@ public:
 		{
 			if (name == temp->name)
 				return;
+			temp = temp->next;
 		}
 		delete temp;
 		if (table == nullptr)
@@ -230,6 +231,7 @@ public:
 			customer *temp = head;
 			head = head->next;
 			head->prev = nullptr;
+			temp->next = nullptr;
 			delete temp;
 			if (isQueue)
 				--sizeQueue;
@@ -330,7 +332,8 @@ public:
 			removePtr->prev->next = removePtr->next;
 			removePtr->next->prev = removePtr->prev;
 
-			removePtr = nullptr; // why
+			removePtr->prev = nullptr;
+			removePtr->next = nullptr;
 			delete removePtr;
 
 			--sizeTable;
@@ -471,7 +474,7 @@ public:
 			gap /= 2;
 		}
 
-		BLUE(N);
+		BLUE(N % MAXSIZE);
 		cout << "purple" << endl;
 	}
 
@@ -502,7 +505,8 @@ public:
 			add(headNeg, temp->name, temp->energy);
 		}
 
-		temp = nullptr;
+		temp->next = nullptr;
+		temp->prev = nullptr;
 		delete temp;
 
 		int sizePos = 0, sizeNeg = 0;
@@ -533,21 +537,22 @@ public:
 			swapCustomer(findCustomer(table, getCustomer(headNeg, i)->name), findCustomer(table, getCustomer(headNeg, sizeNeg - 1 - i)->name));
 		}
 		// done
-		headPos = nullptr;
-		headNeg = nullptr;
+		/* headPos->next = nullptr;
+		headPos->prev = nullptr;
+		headNeg->next = nullptr;
+		headNeg->prev = nullptr; */
+		// this is not the way to delte headPos and headNeg, have to delete entire list
 		delete headPos;
 		delete headNeg;
-		// why can't I delete these two pointers even though they r not relate to table pointer lol. Wait they r somehow in the table @@
 		cout << "reversal" << endl;
 	}
 
-	void UNLIMITED_VOID() // need fix like the orginal idea, find the longest sub with min sum, create a list to contains all min sum of each customer, then compare, then choose the one that meets the requirement, then print out.
+	void UNLIMITED_VOID()
 	{
 		if (sizeTable < 4)
 			return;
 		if (sizeTable == 4)
 		{
-			// idk if i have to print 4 times or not, do this later
 			customer *temp = table;
 			while (1)
 			{
@@ -558,62 +563,88 @@ public:
 			}
 			return;
 		}
-
+		// normal case
 		customer *temp = table;
 
+		int sum = 0;
+		int length = 0;
+		string Name;
 		while (1)
 		{
-			string Name = temp->name;
-			customer *sumList = nullptr;
-			int sum = 0;
-			customer *sumTemp = temp;
+			customer *tempTemp = temp;
+			int tempSum = 0;
 			for (int i = 0; i < 4; i++)
 			{
-				sum += sumTemp->energy;
-				sumTemp = sumTemp->next;
+				tempSum += tempTemp->energy;
+				tempTemp = tempTemp->next;
 			}
-			// sumList is the list of all sum of subsequences start from temp
-			add(sumList, Name, sum); // head
-			while (1)
+			int tempLength = 4;
+			// now sum = first 4, length = 4, start comparing
+			while (tempTemp != temp)
 			{
-				sum += sumTemp->energy;
-				add(sumList, Name, sum);
-				sumTemp = sumTemp->next;
-				if (sumTemp == temp)
-					break;
-			}
+				if (tempSum < sum || (tempSum == sum && tempLength >= length))
+				{
+					sum = tempSum;
+					length = tempLength;
+					Name = temp->name;
+				}
+				++tempLength;
+				tempSum += tempTemp->energy;
 
-			sumTemp = nullptr;
-			delete sumTemp;
-			int minSum = __INT32_MAX__;
-			int length;
-			for (int i = 0; i < sizeTable - 4 + 1 || sumList != nullptr; i++)
-			{
-				if (sumList->energy >= minSum)
-					length = sizeTable - i - 1;
-				sumList = sumList->next;
+				tempTemp = tempTemp->next;
 			}
-			delete sumList;
+			/* tempTemp->next = nullptr;
+			tempTemp->prev = nullptr;
+			delete tempTemp; */
+			// after the loop we now get the smallest sum with longest length possible, with the Name of customer holding that subsequence
 			/*********/
-			customer *print = temp;
-			for (int i = 0; i < length; i++)
-			{
-				cout << print->name << "-" << print->energy << endl;
-				print = print->next;
-			}
 			temp = temp->next;
 			if (temp == table)
 				break;
 		}
 
-		temp = nullptr;
-		delete temp;
+		// print
+		temp = findCustomer(table, Name);
+		string minName = Name;
+		int minEnergy = __INT32_MAX__;
+		int minPos;
+		for (int i = 0; i < length; i++)
+		{
+			if (temp->energy < minEnergy) // take the first minimum value
+			{
+				minEnergy = temp->energy;
+				minName = temp->name;
+				minPos = i;
+			}
+			temp = temp->next;
+		}
 
+		temp = findCustomer(table, minName);
+		while (length > minPos)
+		{
+			cout << temp->name << "-" << temp->energy << endl;
+			temp = temp->next;
+			--length;
+		}
+		temp = findCustomer(table, Name);
+		while (length > 0)
+		{
+			cout << temp->name << "-" << temp->energy << endl;
+			temp = temp->next;
+			--length;
+		}
+
+		/* temp->next = nullptr;
+		temp->prev = nullptr;
+		delete temp; */
+
+		// Add customer from queue
 		while (sizeTable < MAXSIZE || queue != nullptr)
 		{
 			RED(queue->name, queue->energy);
 			remove(queue, nullptr, true);
 		}
+
 		cout << "unlimited_void" << endl;
 	}
 
