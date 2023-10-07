@@ -128,18 +128,24 @@ public:
 
 	void RED(string name, int energy)
 	{
+		cout << "RED check \n";
 		if (energy == 0 || MAXSIZE == 0)
 			return;
+		if (table == nullptr)
+		{
+			addTable(name, energy);
+			return;
+		}
 		customer *temp = table;
 		while (1)
 		{
 			if (name == temp->name)
 				return;
 			temp = temp->next;
-			if (temp == table)
+			if (temp == table || temp == nullptr)
 				break;
 		}
-		// temp is currently table->prev
+		// temp is currently table->prev or temp == nullptr
 		temp = queue;
 		while (temp != nullptr)
 		{
@@ -148,11 +154,7 @@ public:
 			temp = temp->next;
 		}
 		delete temp;
-		if (table == nullptr)
-		{
-			addTable(name, energy);
-			return;
-		}
+
 		if (sizeTable < MAXSIZE / 2)
 		{
 			if (energy >= table->energy)
@@ -192,7 +194,14 @@ public:
 				add(queue, name, energy, true);
 			}
 		}
-		cout << name << " " << energy << endl;
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 	}
 
 	customer *findCustomer(customer *head, string name)
@@ -303,6 +312,7 @@ public:
 
 	void BLUE(int num)
 	{
+		cout << "BLUE check \n";
 		if (num == 0)
 			return;
 
@@ -343,7 +353,7 @@ public:
 		if (sizeQueue == 0)
 			return;
 
-		while (sizeTable < MAXSIZE || queue != nullptr)
+		while (sizeTable < MAXSIZE && queue != nullptr)
 		{
 			RED(queue->name, queue->energy);
 			remove(queue, nullptr, true);
@@ -433,7 +443,7 @@ public:
 		{
 			if (index < 0 || index >= sizeQueue)
 			{
-				cout << "out of index";
+				cout << index << " out of index";
 				return nullptr;
 			}
 		}
@@ -445,6 +455,9 @@ public:
 
 	void PURPLE()
 	{
+		cout << "PURPLE check \n";
+		if (queue == nullptr || queue->next == nullptr)
+			return;
 		int N = 0;
 		int pos;
 		int largestEnergy = 0;
@@ -475,11 +488,19 @@ public:
 		}
 
 		BLUE(N % MAXSIZE);
-		cout << "purple" << endl;
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 	}
 
 	void REVERSAL()
 	{
+		cout << "REVERSAL check \n";
 		// split into two part: positive energy and negative energy, reverse each part.
 		customer *headPos = nullptr;
 		customer *headNeg = nullptr;
@@ -505,9 +526,14 @@ public:
 			add(headNeg, temp->name, temp->energy);
 		}
 
-		temp->next = nullptr;
-		temp->prev = nullptr;
-		delete temp;
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 
 		int sizePos = 0, sizeNeg = 0;
 		customer *count = headPos;
@@ -523,7 +549,6 @@ public:
 			sizeNeg++;
 			count = count->next;
 		}
-		delete count;
 
 		// swap positive energy
 		for (int i = 0; i < sizePos / 2; i++)
@@ -536,19 +561,29 @@ public:
 		{
 			swapCustomer(findCustomer(table, getCustomer(headNeg, i)->name), findCustomer(table, getCustomer(headNeg, sizeNeg - 1 - i)->name));
 		}
+
 		// done
 		/* headPos->next = nullptr;
 		headPos->prev = nullptr;
 		headNeg->next = nullptr;
-		headNeg->prev = nullptr; */
-		// this is not the way to delte headPos and headNeg, have to delete entire list
+		headNeg->prev = nullptr;
 		delete headPos;
 		delete headNeg;
-		cout << "reversal" << endl;
+		*/
+		// this is not the way to delte headPos and headNeg, have to delete entire list
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 	}
 
 	void UNLIMITED_VOID()
 	{
+		cout << "UNLIMITED VOID check \n";
 		if (sizeTable < 4)
 			return;
 		if (sizeTable == 4)
@@ -620,12 +655,14 @@ public:
 		}
 
 		temp = findCustomer(table, minName);
+
 		while (length > minPos)
 		{
 			cout << temp->name << "-" << temp->energy << endl;
 			temp = temp->next;
 			--length;
 		}
+
 		temp = findCustomer(table, Name);
 		while (length > 0)
 		{
@@ -639,17 +676,16 @@ public:
 		delete temp; */
 
 		// Add customer from queue
-		while (sizeTable < MAXSIZE || queue != nullptr)
+		while (sizeTable < MAXSIZE && queue != nullptr)
 		{
 			RED(queue->name, queue->energy);
 			remove(queue, nullptr, true);
 		}
-
-		cout << "unlimited_void" << endl;
 	}
 
 	void DOMAIN_EXPANSION()
 	{
+		cout << "DOMAIN EXPANSION check \n";
 		int ePos = 0;
 		int eNeg = 0;
 
@@ -711,11 +747,19 @@ public:
 		}
 		delete temp;
 
-		cout << "domain_expansion" << endl;
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
 	}
 
 	void LIGHT(int num)
 	{
+		cout << "LIGHT check \n";
 		if (num > 0)
 		{
 			customer *temp = table;
