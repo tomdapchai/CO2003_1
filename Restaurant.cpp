@@ -535,15 +535,6 @@ public:
 			add(headNeg, temp->name, temp->energy);
 		}
 
-		temp = table;
-		while (1)
-		{
-			cout << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-
 		int sizePos = 0, sizeNeg = 0;
 		customer *count = headPos;
 		while (count != nullptr)
@@ -571,15 +562,22 @@ public:
 			swapCustomer(findCustomer(table, getCustomer(headNeg, i)->name), findCustomer(table, getCustomer(headNeg, sizeNeg - 1 - i)->name));
 		}
 
-		// done
-		/* headPos->next = nullptr;
-		headPos->prev = nullptr;
-		headNeg->next = nullptr;
-		headNeg->prev = nullptr;
+		// free headPos and headNeg
+		while (headPos != nullptr)
+		{
+			customer *temp = headPos;
+			headPos = headPos->next;
+			delete temp;
+		}
 		delete headPos;
+		while (headNeg != nullptr)
+		{
+			customer *temp = headNeg;
+			headNeg = headNeg->next;
+			delete temp;
+		}
 		delete headNeg;
-		*/
-		// this is not the way to delte headPos and headNeg, have to delete entire list
+
 		temp = table;
 		while (1)
 		{
