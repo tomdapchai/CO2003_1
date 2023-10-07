@@ -728,17 +728,20 @@ public:
 			table = table->next;
 			delete temp;
 		}
+		delete table;
 		while (queue != nullptr)
 		{
 			customer *temp = queue;
 			queue = queue->next;
 			delete temp;
 		}
+		delete queue;
 		while (recent != nullptr)
 		{
 			customer *temp = recent;
 			recent = recent->next;
 			delete temp;
 		}
+		delete recent;
 	}
 };
