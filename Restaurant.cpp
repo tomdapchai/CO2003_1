@@ -6,7 +6,7 @@ public:
 	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position.
 	customer *queue = nullptr;	// Doubly linked list presents the queue, always points to head of the queue.
 	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point to the head.
-	enum position
+	enum Direction
 	{
 		DEFAULT = 0,
 		CLOCKWISE,
@@ -40,9 +40,9 @@ public:
 			++sizeQueue;
 	}
 
-	void addTable(string name, int energy, position pos = DEFAULT)
+	void addTable(string name, int energy, Direction direction = DEFAULT)
 	{
-		switch (pos)
+		switch (direction)
 		{
 		case CLOCKWISE:
 			if (table->next == nullptr)
@@ -97,6 +97,7 @@ public:
 			return;
 		if (table == nullptr)
 		{
+
 			addTable(name, energy);
 			return;
 		}
@@ -110,14 +111,16 @@ public:
 				break;
 		}
 		// temp is currently table->prev or temp == nullptr
-		temp = queue;
-		while (temp != nullptr)
+		if (sizeTable >= MAXSIZE)
 		{
-			if (name == temp->name)
-				return;
-			temp = temp->next;
+			temp = queue;
+			while (temp != nullptr)
+			{
+				if (name == temp->name)
+					return;
+				temp = temp->next;
+			}
 		}
-		delete temp;
 
 		if (sizeTable < MAXSIZE / 2)
 		{
@@ -126,7 +129,7 @@ public:
 			else
 				addTable(name, energy, ANTICLOCKWISE);
 		}
-		else if (sizeTable >= MAXSIZE / 2 && sizeTable <= MAXSIZE)
+		else if ((sizeTable >= MAXSIZE / 2) && sizeTable < MAXSIZE)
 		{
 			int absRES = 0;
 			int RES;
@@ -158,6 +161,8 @@ public:
 				add(queue, name, energy, true);
 			}
 		}
+		// print table
+		cout << "Table\n";
 		temp = table;
 		while (1)
 		{
@@ -165,6 +170,22 @@ public:
 			temp = temp->next;
 			if (temp == table)
 				break;
+		}
+		// print queue
+		cout << "Queue\n";
+		temp = queue;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+		// print recent
+		cout << "Recent\n";
+		temp = recent;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
 		}
 	}
 
@@ -180,7 +201,7 @@ public:
 
 	void remove(customer *&head, customer *r = nullptr, bool isQueue = false)
 	{
-		if (head->next == nullptr && head->prev == nullptr)
+		if (head == nullptr || (head->next == nullptr && head->prev == nullptr))
 		{
 			delete head;
 			return;
@@ -298,12 +319,38 @@ public:
 			RED(queue->name, queue->energy);
 			remove(queue, nullptr, true);
 		}
-		cout << "blue " << num << endl;
+
+		cout << "Table\n";
+		temp = table;
+		while (1)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		}
+		// print queue
+		cout << "Queue\n";
+		temp = queue;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+		// print recent
+		cout << "Recent\n";
+		temp = recent;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
 	}
 
 	void swapCustomer(customer *one, customer *two)
 	{ // use for swapping in shell sort or in table
-		if (one == two || one->name == two->name)
+
+		if (one == two || (one == nullptr || two == nullptr) || one->name == two->name)
 			return;
 		if (one->next == two || two->next == one) // adjacent
 		{
@@ -379,6 +426,11 @@ public:
 	customer *getCustomer(customer *head, int index, bool isQueue = false)
 	{
 		//
+		if (head == nullptr)
+		{
+			cout << "no head \n";
+			return;
+		}
 		if (isQueue)
 		{
 			if (index < 0 || index >= sizeQueue)
@@ -418,7 +470,7 @@ public:
 		{
 			for (int i = gap; i <= pos; i++)
 			{
-				for (int j = i; j >= gap && getCustomer(queue, j - gap, true)->energy > getCustomer(queue, j, true)->energy; j -= gap)
+				for (int j = i; j >= gap && getCustomer(queue, j - gap, true)->energy < getCustomer(queue, j, true)->energy; j -= gap)
 				{
 					swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
 					N++;
@@ -427,7 +479,17 @@ public:
 			gap /= 2;
 		}
 
+		cout << N << endl;
+
+		temp = queue;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+
 		BLUE(N % MAXSIZE);
+		cout << "Table\n";
 		temp = table;
 		while (1)
 		{
@@ -435,6 +497,22 @@ public:
 			temp = temp->next;
 			if (temp == table)
 				break;
+		}
+		// print queue
+		cout << "Queue\n";
+		temp = queue;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+		// print recent
+		cout << "Recent\n";
+		temp = recent;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
 		}
 	}
 
@@ -653,7 +731,6 @@ public:
 		}
 		// Start removing
 		temp = table;
-
 		while (1)
 		{
 			customer *tempTemp = temp;
@@ -663,8 +740,7 @@ public:
 				remove(recent, findCustomer(recent, tempTemp->name));
 				remove(table, tempTemp);
 			}
-
-			if (temp == table)
+			if (temp == table && (ePos >= eNeg ? table->energy > 0 : table->energy < 0))
 				break;
 		}
 		temp = queue;
@@ -676,6 +752,7 @@ public:
 				remove(queue, tempTemp, true);
 		}
 
+		cout << "Table\n";
 		temp = table;
 		while (1)
 		{
@@ -683,6 +760,22 @@ public:
 			temp = temp->next;
 			if (temp == table)
 				break;
+		}
+		// print queue
+		cout << "Queue\n";
+		temp = queue;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+		// print recent
+		cout << "Recent\n";
+		temp = recent;
+		while (temp != nullptr)
+		{
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
 		}
 	}
 
