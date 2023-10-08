@@ -3,6 +3,8 @@
 class imp_res : public Restaurant
 {
 public:
+	int numAdd = 0;
+	int numDel = 0;
 	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position.
 	customer *queue = nullptr;	// Doubly linked list presents the queue, always points to head of the queue.
 	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point to the head.
@@ -22,6 +24,7 @@ public:
 
 	void add(customer *&head, string name, int energy, bool isQueue = false)
 	{ // add tail
+		numAdd++;
 		if (head == nullptr)
 		{
 			head = new customer(name, energy, nullptr, nullptr);
@@ -42,6 +45,7 @@ public:
 
 	void addTable(string name, int energy, Direction direction = DEFAULT)
 	{
+		numAdd++;
 		switch (direction)
 		{
 		case CLOCKWISE:
@@ -200,6 +204,7 @@ public:
 
 	void remove(customer *&head, customer *r = nullptr, bool isQueue = false)
 	{
+		numDel++;
 		if (head == nullptr)
 		{
 			delete head;
@@ -290,15 +295,7 @@ public:
 				table = removePtr->next;
 			else
 				table = removePtr->prev;
-
-			removePtr->prev->next = removePtr->next;
-			removePtr->next->prev = removePtr->prev;
-
-			removePtr->prev = nullptr;
-			removePtr->next = nullptr;
-			delete removePtr;
-
-			--sizeTable;
+			remove(table, removePtr);
 			remove(recent);
 		}
 
@@ -349,7 +346,6 @@ public:
 
 	void swapCustomer(customer *one, customer *two)
 	{ // use for swapping in shell sort or in table
-
 		if (one == two || (one == nullptr || two == nullptr) || one->name == two->name)
 			return;
 		if (one->next == two || two->next == one) // adjacent
@@ -425,7 +421,6 @@ public:
 
 	customer *getCustomer(customer *head, int index, bool isQueue = false)
 	{
-		//
 		if (head == nullptr)
 		{
 			cout << "no head \n";
@@ -465,19 +460,64 @@ public:
 		}
 		// Perform shell sort from positon 0 to pos on the queue.
 
+		customer *copyQueue = nullptr;
+
+		temp = queue;
+		for (int i = 0; i <= pos; i++)
+		{
+			//
+			add(copyQueue, temp->name, temp->energy);
+			temp = temp->next;
+		}
+
 		int gap = (pos + 1) / 2;
 		while (gap > 0)
 		{
 			for (int i = gap; i <= pos; i++)
 			{
-				for (int j = i; j >= gap && getCustomer(queue, j - gap, true)->energy < getCustomer(queue, j, true)->energy; j -= gap)
+				for (int j = i; j >= gap && abs(getCustomer(queue, j - gap, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= gap)
 				{
-					swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
-					N++;
+					if (abs(getCustomer(queue, j - gap, true)->energy) < abs(getCustomer(queue, j, true)->energy))
+					{
+						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
+						N++;
+					}
+					else
+					{
+						int pos1Origin = 0, pos2Origin = 0;
+
+						customer *i = copyQueue;
+						while (i->name != getCustomer(queue, j - gap, true)->name)
+						{
+							pos1Origin++;
+							i = i->next;
+						}
+
+						i = copyQueue;
+						while (i->name != getCustomer(queue, j, true)->name)
+						{
+							pos2Origin++;
+							i = i->next;
+						}
+
+						if (pos1Origin > pos2Origin)
+						{
+							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
+							N++;
+						}
+					}
 				}
 			}
 			gap /= 2;
 		}
+
+		while (copyQueue != nullptr)
+		{
+			customer *tempCopy = copyQueue;
+			copyQueue = copyQueue->next;
+			delete tempCopy;
+		}
+		delete copyQueue;
 
 		cout << N << endl;
 
@@ -815,6 +855,7 @@ public:
 	}
 	~imp_res()
 	{
+		cout << numAdd << " " << numDel << endl;
 		for (int i = 0; i < sizeTable - 1; i++)
 		{
 			customer *temp = table;
@@ -828,7 +869,6 @@ public:
 			customer *temp = queue;
 			queue = queue->next;
 			delete temp;
-			cout << "check 1 \n";
 		}
 		delete queue;
 		cout << "deleted queue \n";
