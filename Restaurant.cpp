@@ -203,7 +203,12 @@ public:
 	{
 		if (head == nullptr || (head->next == nullptr && head->prev == nullptr))
 		{
+			customer *temp = head;
+			head = head->next;
+			delete temp;
 			delete head;
+			if (isQueue)
+				sizeQueue = 0;
 			return;
 		}
 		if (r == nullptr || (r == queue || r == recent)) // queue and recent use, remove head
@@ -212,15 +217,6 @@ public:
 			{
 				cout << "empty \n";
 				return;
-			}
-			if (isQueue)
-			{
-				if (head->next == nullptr)
-				{
-					head = nullptr;
-					sizeQueue = 0;
-					return;
-				}
 			}
 			customer *temp = head;
 			head = head->next;
@@ -429,7 +425,7 @@ public:
 		if (head == nullptr)
 		{
 			cout << "no head \n";
-			return;
+			return nullptr;
 		}
 		if (isQueue)
 		{
@@ -683,13 +679,6 @@ public:
 			temp = temp->next;
 			--length;
 		}
-
-		// Add customer from queue
-		while (sizeTable < MAXSIZE && queue != nullptr)
-		{
-			RED(queue->name, queue->energy);
-			remove(queue, nullptr, true);
-		}
 	}
 
 	void DOMAIN_EXPANSION()
@@ -750,6 +739,13 @@ public:
 			temp = temp->next;
 			if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
 				remove(queue, tempTemp, true);
+		}
+
+		// Add customer from queue
+		while (sizeTable < MAXSIZE && queue != nullptr)
+		{
+			RED(queue->name, queue->energy);
+			remove(queue, nullptr, true);
 		}
 
 		cout << "Table\n";
@@ -821,20 +817,21 @@ public:
 			table = table->next;
 			delete temp;
 		}
-		delete table;
+		cout << "deleted table \n";
 		while (queue != nullptr)
 		{
 			customer *temp = queue;
 			queue = queue->next;
 			delete temp;
+			cout << "check 1 \n";
 		}
-		delete queue;
+		cout << "deleted queue \n";
 		while (recent != nullptr)
 		{
 			customer *temp = recent;
 			recent = recent->next;
 			delete temp;
 		}
-		delete recent;
+		cout << "deleted recent \n";
 	}
 };
