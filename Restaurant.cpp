@@ -97,7 +97,6 @@ public:
 			return;
 		if (table == nullptr)
 		{
-
 			addTable(name, energy);
 			return;
 		}
@@ -201,7 +200,12 @@ public:
 
 	void remove(customer *&head, customer *r = nullptr, bool isQueue = false)
 	{
-		if (head == nullptr || (head->next == nullptr && head->prev == nullptr))
+		if (head == nullptr)
+		{
+			delete head;
+			return;
+		}
+		if (head->next == nullptr && head->prev == nullptr)
 		{
 			customer *temp = head;
 			head = head->next;
@@ -826,6 +830,7 @@ public:
 			delete temp;
 			cout << "check 1 \n";
 		}
+		delete queue;
 		cout << "deleted queue \n";
 		while (recent != nullptr)
 		{
@@ -833,6 +838,7 @@ public:
 			recent = recent->next;
 			delete temp;
 		}
+		delete recent;
 		cout << "deleted recent \n";
 	}
 };
