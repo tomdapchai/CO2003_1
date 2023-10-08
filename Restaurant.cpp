@@ -811,12 +811,13 @@ public:
 	}
 	~imp_res()
 	{
-		for (int i = 0; i < sizeTable; i++)
+		for (int i = 0; i < sizeTable - 1; i++)
 		{
 			customer *temp = table;
 			table = table->next;
 			delete temp;
 		}
+		delete table;
 		cout << "deleted table \n";
 		while (queue != nullptr)
 		{
