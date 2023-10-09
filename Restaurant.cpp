@@ -413,6 +413,7 @@ public:
 			tempTwoNext->prev = one;
 		one->prev = tempTwoPrev;
 		one->next = tempTwoNext;
+
 		if (head1)
 			queue = two;
 		if (head2)
@@ -645,12 +646,26 @@ public:
 		if (sizeTable == 4)
 		{
 			customer *temp = table;
-			while (1)
+			int minE = __INT32_MAX__;
+			int minP;
+			for (int i = 0; i < 4; i++)
+			{
+				if (temp->energy <= minE)
+				{
+					minE = temp->energy;
+					minP = i;
+				}
+				temp = temp->next;
+			}
+
+			temp = table;
+			for (int i = 0; i < minP; i++)
+				temp = temp->next;
+
+			for (int i = 0; i < 4; i++)
 			{
 				cout << temp->name << "-" << temp->energy << endl;
 				temp = temp->next;
-				if (temp == table)
-					break;
 			}
 			return;
 		}
@@ -756,26 +771,21 @@ public:
 		while (temp->next != nullptr)
 			temp = temp->next;
 		// temp : tail = most recent
+		// Start removing in table and recent
 		while (temp != nullptr)
 		{
 			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
-				cout << temp->name << "-" << temp->energy << endl;
-			temp = temp->prev;
-		}
-		// Start removing
-		temp = table;
-		while (1)
-		{
-			customer *tempTemp = temp;
-			temp = temp->next;
-			if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
 			{
-				remove(recent, findCustomer(recent, tempTemp->name));
-				remove(table, tempTemp);
+				cout << temp->name << "-" << temp->energy << endl;
+				remove(table, findCustomer(table, temp->name));
+				customer *tempTemp = temp;
+				temp = temp->prev;
+				remove(recent, tempTemp);
 			}
-			if (temp == table && (ePos >= eNeg ? table->energy > 0 : table->energy < 0))
-				break;
+			else
+				temp = temp->prev;
 		}
+		// Start removing in queue
 		temp = queue;
 		while (temp != nullptr)
 		{
