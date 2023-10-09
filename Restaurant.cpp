@@ -3,8 +3,6 @@
 class imp_res : public Restaurant
 {
 public:
-	int numAdd = 0;
-	int numDel = 0;
 	customer *table = nullptr;	// Doubly circular linked list represents the table, always point to the most recent changed position.
 	customer *queue = nullptr;	// Doubly linked list presents the queue, always points to head of the queue.
 	customer *recent = nullptr; // Doubly linked list present the recent customers, can be used as queue, always point to the head.
@@ -24,7 +22,6 @@ public:
 
 	void add(customer *&head, string name, int energy, bool isQueue = false)
 	{ // add tail
-		numAdd++;
 		if (head == nullptr)
 		{
 			head = new customer(name, energy, nullptr, nullptr);
@@ -45,7 +42,6 @@ public:
 
 	void addTable(string name, int energy, Direction direction = DEFAULT)
 	{
-		numAdd++;
 		switch (direction)
 		{
 		case CLOCKWISE:
@@ -204,7 +200,6 @@ public:
 
 	void remove(customer *&head, customer *r = nullptr, bool isQueue = false)
 	{
-		numDel++;
 		if (head == nullptr)
 		{
 			delete head;
@@ -560,11 +555,13 @@ public:
 	void REVERSAL()
 	{
 		cout << "REVERSAL check \n";
+		if (table == nullptr || table->prev == nullptr)
+			return;
 		// split into two part: positive energy and negative energy, reverse each part.
 		customer *headPos = nullptr;
 		customer *headNeg = nullptr;
 		customer *temp = table;
-		while (temp->prev != table)
+		while (1)
 		{
 			if (temp->energy > 0)
 			{
@@ -575,14 +572,9 @@ public:
 				add(headNeg, temp->name, temp->energy);
 			}
 			temp = temp->prev;
-		}
-		if (temp->energy > 0)
-		{
-			add(headPos, temp->name, temp->energy);
-		}
-		else
-		{
-			add(headNeg, temp->name, temp->energy);
+
+			if (temp == table)
+				break;
 		}
 
 		int sizePos = 0, sizeNeg = 0;
@@ -672,7 +664,7 @@ public:
 		// normal case
 		customer *temp = table;
 
-		int sum = 0;
+		int sum = __INT32_MAX__;
 		int length = 0;
 		string Name;
 		while (1)
@@ -684,11 +676,12 @@ public:
 				tempSum += tempTemp->energy;
 				tempTemp = tempTemp->next;
 			}
+
 			int tempLength = 4;
 			// now sum = first 4, length = 4, start comparing
 			while (tempTemp != temp)
 			{
-				if (tempSum < sum || (tempSum == sum && tempLength >= length))
+				if ((tempSum < sum) || (tempSum == sum && tempLength >= length))
 				{
 					sum = tempSum;
 					length = tempLength;
@@ -722,6 +715,8 @@ public:
 			temp = temp->next;
 		}
 
+		cout << "check \n";
+
 		temp = findCustomer(table, minName);
 
 		while (length > minPos)
@@ -743,6 +738,8 @@ public:
 	void DOMAIN_EXPANSION()
 	{
 		cout << "DOMAIN EXPANSION check \n";
+		if (table == nullptr)
+			return;
 		int ePos = 0;
 		int eNeg = 0;
 
@@ -832,6 +829,16 @@ public:
 	void LIGHT(int num)
 	{
 		cout << "LIGHT check \n";
+		if (num != 0)
+		{
+			if (table == nullptr)
+				return;
+		}
+		else
+		{
+			if (queue == nullptr)
+				return;
+		}
 		if (num > 0)
 		{
 			customer *temp = table;
@@ -865,7 +872,6 @@ public:
 	}
 	~imp_res()
 	{
-		cout << numAdd << " " << numDel << endl;
 		for (int i = 0; i < sizeTable - 1; i++)
 		{
 			customer *temp = table;
