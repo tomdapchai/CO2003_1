@@ -3,10 +3,12 @@
 class imp_res : public Restaurant
 {
 public:
-	customer *table = nullptr;		// Doubly circular linked list represents the table, always point to the most recent changed position.
-	customer *queue = nullptr;		// Doubly linked list presents the queue, always points to head of the queue.
-	customer *recent = nullptr;		// Doubly linked list present the recent customers, can be used as queue, always point to the head.
-	customer *queueOrder = nullptr; // Store the order of customers in queue
+	customer *table;	  // Doubly circular linked list represents the table, always point to the most recent changed position.
+	customer *queue;	  // Doubly linked list presents the queue, always points to head of the queue.
+	customer *recent;	  // Doubly linked list present the recent customers, can be used as queue, always point to the head.
+	customer *queueOrder; // Store the order of customers in queue
+	int sizeTable = 0;
+	int sizeQueue = 0;
 	enum Direction
 	{
 		DEFAULT = 0,
@@ -17,9 +19,13 @@ public:
 	next is CLOCKWISE
 	prev is ANTICLOCKWISE
 	*/
-	imp_res(){};
-	int sizeTable = 0;
-	int sizeQueue = 0;
+	imp_res()
+	{
+		table = nullptr;
+		queue = nullptr;
+		recent = nullptr;
+		queueOrder = nullptr;
+	};
 
 	void add(customer *&head, string name, int energy, bool isQueue = false)
 	{ // add tail
@@ -51,7 +57,6 @@ public:
 				customer *newCus = new customer(name, energy, table, table);
 				table->next = newCus;
 				table->prev = newCus;
-				customer *tempTable = table;
 				table = newCus;
 			}
 			else
@@ -60,7 +65,6 @@ public:
 				customer *newCus = new customer(name, energy, table, temp);
 				temp->prev = newCus;
 				table->next = newCus;
-				customer *tempTable = table;
 				table = newCus;
 			}
 			break;
@@ -70,7 +74,6 @@ public:
 				customer *newCus = new customer(name, energy, table, table);
 				table->next = newCus;
 				table->prev = newCus;
-				customer *tempTable = table;
 				table = newCus;
 			}
 			else
@@ -79,7 +82,6 @@ public:
 				customer *newCus = new customer(name, energy, temp, table);
 				table->prev = newCus;
 				temp->next = newCus;
-				customer *tempTable = table;
 				table = newCus;
 			}
 			break;
@@ -87,7 +89,7 @@ public:
 			table = new customer(name, energy, nullptr, nullptr);
 			break;
 		}
-		add(recent, name, energy);
+		add(recent, name, energy); // leak goes here - indirectly and definetely
 		++sizeTable;
 	}
 
@@ -140,7 +142,6 @@ public:
 				{
 					absRES = abs(energy - temp->energy);
 					RES = energy - temp->energy;
-					customer *tempTable = table;
 					table = temp;
 				}
 				temp = temp->next;
@@ -150,7 +151,7 @@ public:
 			if (RES < 0)
 				addTable(name, energy, ANTICLOCKWISE);
 			else
-				addTable(name, energy, CLOCKWISE);
+				addTable(name, energy, CLOCKWISE); // leak goes here - indirectly and definitely
 		}
 		else
 		{
@@ -158,8 +159,8 @@ public:
 				return;
 			else
 			{
-				add(queue, name, energy, true);
-				add(queueOrder, name, energy);
+				add(queue, name, energy, true); // leak goes here - directly (allocate but not free enough)
+				add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
 			}
 		}
 		// print table
@@ -219,11 +220,6 @@ public:
 		}
 		if (r == nullptr || (r == queue || r == recent || r == queueOrder)) // queue and recent and queueOrder use, remove head
 		{
-			if (head == nullptr)
-			{
-				cerr << "empty \n";
-				return;
-			}
 			customer *temp = head;
 			head = head->next;
 			head->prev = nullptr;
@@ -231,7 +227,7 @@ public:
 			if (isQueue)
 				--sizeQueue;
 		}
-		else // remove other places
+		else // remove at other places
 		{
 			if (head == table) // table
 			{
@@ -242,12 +238,11 @@ public:
 
 				r->prev->next = r->next;
 				r->next->prev = r->prev;
-
 				--sizeTable;
 			}
 			else // queue or recent or queueOrder
 			{
-				if (r->next == nullptr)
+				if (r->next == nullptr) // r = tail
 				{
 					r->prev->next = nullptr;
 					r = r->next;
@@ -325,7 +320,7 @@ public:
 
 		while (sizeTable < MAXSIZE && queue != nullptr)
 		{
-			RED(queue->name, queue->energy);
+			RED(queue->name, queue->energy); // leak goes here - definitely
 			remove(queueOrder, findCustomer(queueOrder, queue->name));
 			remove(queue, nullptr, true);
 		}
@@ -533,7 +528,7 @@ public:
 			temp = temp->next;
 		}
 
-		BLUE(N % MAXSIZE);
+		BLUE(N % MAXSIZE); // leak goes here - definitely, same block as line 328
 
 		cerr << "Table\n";
 		temp = table;
