@@ -92,7 +92,7 @@ public:
 
 	void RED(string name, int energy)
 	{
-		cout << "RED check \n";
+		cerr << "RED check \n";
 		if (energy == 0 || MAXSIZE == 0)
 			return;
 		if (table == nullptr)
@@ -135,10 +135,10 @@ public:
 			customer *temp = table;
 			while (1)
 			{
-				if (abs(abs(energy) - abs(temp->energy)) > absRES)
+				if (abs(energy - temp->energy) > absRES)
 				{
-					absRES = abs(abs(energy) - abs(temp->energy));
-					RES = abs(energy) - abs(temp->energy);
+					absRES = abs(energy - temp->energy);
+					RES = energy - temp->energy;
 					customer *tempTable = table;
 					table = temp;
 				}
@@ -161,29 +161,29 @@ public:
 			}
 		}
 		// print table
-		cout << "Table\n";
+		cerr << "Table\n";
 		temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
 		}
 		// print queue
-		cout << "Queue\n";
+		cerr << "Queue\n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 		// print recent
-		cout << "Recent\n";
+		cerr << "Recent\n";
 		temp = recent;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 	}
@@ -219,7 +219,7 @@ public:
 		{
 			if (head == nullptr)
 			{
-				cout << "empty \n";
+				cerr << "empty \n";
 				return;
 			}
 			customer *temp = head;
@@ -264,7 +264,7 @@ public:
 
 	void BLUE(int num)
 	{
-		cout << "BLUE check \n";
+		cerr << "BLUE check \n";
 		if (num == 0)
 			return;
 
@@ -279,6 +279,20 @@ public:
 			delete table;
 			table = nullptr;
 			sizeTable = 0;
+			while (recent != nullptr)
+			{
+				customer *temp = recent;
+				recent = recent->next;
+				delete temp;
+			}
+			delete recent;
+			recent = nullptr;
+
+			while (sizeTable < MAXSIZE && queue != nullptr)
+			{
+				RED(queue->name, queue->energy);
+				remove(queue, nullptr, true);
+			}
 			return;
 		}
 
@@ -297,7 +311,7 @@ public:
 		customer *temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
@@ -312,29 +326,29 @@ public:
 			remove(queue, nullptr, true);
 		}
 
-		cout << "Table\n";
+		cerr << "Table\n";
 		temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
 		}
 		// print queue
-		cout << "Queue\n";
+		cerr << "Queue\n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 		// print recent
-		cout << "Recent\n";
+		cerr << "Recent\n";
 		temp = recent;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 	}
@@ -419,14 +433,14 @@ public:
 	{
 		if (head == nullptr)
 		{
-			cout << "no head \n";
+			cerr << "no head \n";
 			return nullptr;
 		}
 		if (isQueue)
 		{
 			if (index < 0 || index >= sizeQueue)
 			{
-				cout << index << " out of index";
+				cerr << index << " out of index";
 				return nullptr;
 			}
 		}
@@ -438,7 +452,7 @@ public:
 
 	void PURPLE()
 	{
-		cout << "PURPLE check \n";
+		cerr << "PURPLE check \n";
 		if (queue == nullptr || queue->next == nullptr)
 			return;
 		int N = 0;
@@ -515,46 +529,46 @@ public:
 		}
 		delete copyQueue;
 
-		cout << N << endl;
+		cerr << N << endl;
 
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 
 		BLUE(N % MAXSIZE);
-		cout << "Table\n";
+		cerr << "Table\n";
 		temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
 		}
 		// print queue
-		cout << "Queue\n";
+		cerr << "Queue\n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 		// print recent
-		cout << "Recent\n";
+		cerr << "Recent\n";
 		temp = recent;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 	}
 
 	void REVERSAL()
 	{
-		cout << "REVERSAL check \n";
+		cerr << "REVERSAL check \n";
 		if (table == nullptr || table->prev == nullptr)
 			return;
 		// split into two part: positive energy and negative energy, reverse each part.
@@ -623,7 +637,7 @@ public:
 		temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
@@ -632,7 +646,7 @@ public:
 
 	void UNLIMITED_VOID()
 	{
-		cout << "UNLIMITED VOID check \n";
+		cerr << "UNLIMITED VOID check \n";
 		if (sizeTable < 4)
 			return;
 		if (sizeTable == 4)
@@ -676,21 +690,21 @@ public:
 				tempSum += tempTemp->energy;
 				tempTemp = tempTemp->next;
 			}
-
+			tempTemp = tempTemp->prev;
 			int tempLength = 4;
 			// now sum = first 4, length = 4, start comparing
 			while (tempTemp != temp)
 			{
-				if ((tempSum < sum) || (tempSum == sum && tempLength >= length))
+				if ((tempSum < sum) || ((tempSum == sum) && (tempLength >= length)))
 				{
+					cerr << tempSum << " " << sum << endl;
 					sum = tempSum;
 					length = tempLength;
 					Name = temp->name;
 				}
 				++tempLength;
-				tempSum += tempTemp->energy;
-
 				tempTemp = tempTemp->next;
+				tempSum += tempTemp->energy;
 			}
 			// after the loop we now get the smallest sum with longest length possible, with the Name of customer holding that subsequence
 			/*********/
@@ -715,7 +729,7 @@ public:
 			temp = temp->next;
 		}
 
-		cout << "check \n";
+		cerr << sum << endl;
 
 		temp = findCustomer(table, minName);
 
@@ -737,8 +751,8 @@ public:
 
 	void DOMAIN_EXPANSION()
 	{
-		cout << "DOMAIN EXPANSION check \n";
-		if (table == nullptr)
+		cerr << "DOMAIN EXPANSION check \n";
+		if (table == nullptr || table->next == nullptr)
 			return;
 		int ePos = 0;
 		int eNeg = 0;
@@ -754,20 +768,39 @@ public:
 			if (temp == table)
 				break;
 		}
-		temp = queue;
-		while (temp != nullptr)
+		if (queue != nullptr)
 		{
-			if (temp->energy > 0)
-				ePos += temp->energy;
-			else
-				eNeg += abs(temp->energy);
-			temp = temp->next;
+			temp = queue;
+			while (temp != nullptr)
+			{
+				if (temp->energy > 0)
+					ePos += temp->energy;
+				else
+					eNeg += abs(temp->energy);
+				temp = temp->next;
+			}
+			// Print the removed customers
+			temp = queue;
+			while (temp->next != nullptr)
+				temp = temp->next;
+			// temp: tail of queue, most recent get in the restaurant
+			// Start removing in queue
+			while (temp != nullptr)
+			{
+				customer *tempTemp = temp;
+				temp = temp->prev;
+				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+				{
+					cout << tempTemp->name << "-" << tempTemp->energy << endl;
+					remove(queue, tempTemp, true);
+				}
+			}
 		}
-		// Print the removed customers
+
 		temp = recent;
 		while (temp->next != nullptr)
 			temp = temp->next;
-		// temp : tail = most recent
+		// temp : tail = most recent get in the table
 		// Start removing in table and recent
 		while (temp != nullptr)
 		{
@@ -782,15 +815,6 @@ public:
 			else
 				temp = temp->prev;
 		}
-		// Start removing in queue
-		temp = queue;
-		while (temp != nullptr)
-		{
-			customer *tempTemp = temp;
-			temp = temp->next;
-			if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
-				remove(queue, tempTemp, true);
-		}
 
 		// Add customer from queue
 		while (sizeTable < MAXSIZE && queue != nullptr)
@@ -799,40 +823,45 @@ public:
 			remove(queue, nullptr, true);
 		}
 
-		cout << "Table\n";
+		cerr << "Table\n";
 		temp = table;
 		while (1)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 			if (temp == table)
 				break;
 		}
 		// print queue
-		cout << "Queue\n";
+		cerr << "Queue\n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 		// print recent
-		cout << "Recent\n";
+		cerr << "Recent\n";
 		temp = recent;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 	}
 
 	void LIGHT(int num)
 	{
-		cout << "LIGHT check \n";
+		cerr << "LIGHT check \n";
 		if (num != 0)
 		{
 			if (table == nullptr)
 				return;
+			if (table->next == nullptr)
+			{
+				cout << table->name << "-" << table->energy << endl;
+				return;
+			}
 		}
 		else
 		{
@@ -862,12 +891,13 @@ public:
 		else
 		{
 			customer *temp = table;
-			while (temp->prev != table)
+			while (1)
 			{
 				cout << temp->name << "-" << temp->energy << endl;
 				temp = temp->prev;
+				if (temp == table)
+					break;
 			}
-			cout << temp->name << "-" << temp->energy << endl;
 		}
 	}
 	~imp_res()
@@ -879,7 +909,7 @@ public:
 			delete temp;
 		}
 		delete table;
-		cout << "deleted table \n";
+		cerr << "deleted table \n";
 		while (queue != nullptr)
 		{
 			customer *temp = queue;
@@ -887,7 +917,7 @@ public:
 			delete temp;
 		}
 		delete queue;
-		cout << "deleted queue \n";
+		cerr << "deleted queue \n";
 		while (recent != nullptr)
 		{
 			customer *temp = recent;
@@ -895,6 +925,6 @@ public:
 			delete temp;
 		}
 		delete recent;
-		cout << "deleted recent \n";
+		cerr << "deleted recent \n";
 	}
 };
