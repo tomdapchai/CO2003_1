@@ -46,7 +46,6 @@ public:
 		if (isQueue)
 			++sizeQueue;
 	}
-
 	void addTable(string name, int energy, Direction direction = DEFAULT)
 	{
 		switch (direction)
@@ -205,29 +204,30 @@ public:
 	{
 		if (head == nullptr)
 		{
-			delete head;
 			return;
-		}
-		if (head->next == nullptr && head->prev == nullptr)
+		}													// ok
+		if (head->next == nullptr && head->prev == nullptr) // ok
 		{
 			customer *temp = head;
 			head = head->next;
 			delete temp;
 			delete head;
+			head = nullptr;
 			if (isQueue)
 				sizeQueue = 0;
 			return;
 		}
-		if (r == nullptr || (r == queue || r == recent || r == queueOrder)) // queue and recent and queueOrder use, remove head
+		if (r == nullptr || (r == head && head != table)) // queue and recent and queueOrder use, remove head
 		{
 			customer *temp = head;
 			head = head->next;
 			head->prev = nullptr;
 			delete temp;
+			temp = nullptr;
 			if (isQueue)
 				--sizeQueue;
-		}
-		else // remove at other places
+		}	 // ok
+		else // remove at other places // leaks goes here
 		{
 			if (head == table) // table
 			{
@@ -245,7 +245,7 @@ public:
 				if (r->next == nullptr) // r = tail
 				{
 					r->prev->next = nullptr;
-					r = r->next;
+					r->prev = nullptr;
 				}
 				else
 				{
@@ -256,6 +256,7 @@ public:
 					--sizeQueue;
 			}
 			delete r;
+			r = nullptr;
 		}
 	}
 
@@ -516,7 +517,7 @@ public:
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cerr << temp->name << " " << temp->energy << endl;
+			temp->print();
 			temp = temp->next;
 		}
 
@@ -564,7 +565,6 @@ public:
 			temp = temp->next;
 		}
 	}
-
 	void REVERSAL()
 	{
 		cerr << "REVERSAL check \n";
@@ -669,7 +669,7 @@ public:
 
 			for (int i = 0; i < 4; i++)
 			{
-				cout << temp->name << "-" << temp->energy << endl;
+				temp->print();
 				temp = temp->next;
 			}
 			return;
@@ -734,7 +734,7 @@ public:
 
 		while (length > minPos)
 		{
-			cout << temp->name << "-" << temp->energy << endl;
+			temp->print();
 			temp = temp->next;
 			--length;
 		}
@@ -742,7 +742,7 @@ public:
 		temp = findCustomer(table, Name);
 		while (length > 0)
 		{
-			cout << temp->name << "-" << temp->energy << endl;
+			temp->print();
 			temp = temp->next;
 			--length;
 		}
@@ -791,7 +791,7 @@ public:
 				temp = temp->prev;
 				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
 				{
-					cout << tempTemp->name << "-" << tempTemp->energy << endl;
+					tempTemp->print();
 					string Name = tempTemp->name;
 					remove(queueOrder, tempTemp);
 					remove(queue, findCustomer(queue, Name), true);
@@ -809,7 +809,7 @@ public:
 		{
 			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
 			{
-				cout << temp->name << "-" << temp->energy << endl;
+				temp->print();
 				remove(table, findCustomer(table, temp->name));
 				customer *tempTemp = temp;
 				temp = temp->prev;
@@ -860,7 +860,6 @@ public:
 			temp = temp->next;
 		}
 	}
-
 	void LIGHT(int num)
 	{
 		cerr << "LIGHT check \n";
@@ -870,7 +869,7 @@ public:
 				return;
 			if (table->next == nullptr)
 			{
-				cout << table->name << "-" << table->energy << endl;
+				table->print();
 				return;
 			}
 		}
@@ -884,7 +883,7 @@ public:
 			customer *temp = table;
 			while (1)
 			{
-				cout << temp->name << "-" << temp->energy << endl;
+				temp->print();
 				temp = temp->next;
 				if (temp == table)
 					break;
@@ -895,7 +894,7 @@ public:
 			customer *temp = queue;
 			while (temp != nullptr)
 			{
-				cout << temp->name << "-" << temp->energy << endl;
+				temp->print();
 				temp = temp->next;
 			}
 		}
@@ -904,7 +903,7 @@ public:
 			customer *temp = table;
 			while (1)
 			{
-				cout << temp->name << "-" << temp->energy << endl;
+				temp->print();
 				temp = temp->prev;
 				if (temp == table)
 					break;
