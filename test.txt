@@ -1,101 +1,36 @@
-MAXSIZE 39
-RED yo -4
-RED sn -7
-RED vl -2
-REVERSAL
-RED cw 5
-RED lg -1
-RED bk 9
-RED bl -7
-RED iw -10
-RED nl 1
-REVERSAL
-LIGHT -4
-REVERSAL
-RED bh 7
-RED qs 7
-RED xx 8
-RED aw -8
-REVERSAL
-RED pz 8
-RED fp -5
-RED lh 2
-RED ac -7
-RED ma -7
-RED qf 2
-RED pu -7
-REVERSAL
-RED yg 5
-RED xo -1
-RED wp -3
-REVERSAL
-REVERSAL
-RED ib -7
-REVERSAL
-RED pt -9
-REVERSAL
-RED gg -3
-RED wh 4
-RED eg 5
-RED yf -8
-REVERSAL
-REVERSAL
-RED gi -2
-REVERSAL
-LIGHT 6
-REVERSAL
-RED ie -7
-RED nc 6
-RED nz -1
-REVERSAL
-RED bo -6
-REVERSAL
-RED gg 9
-RED zn 7
-RED ok 6
-RED cq -10
-RED pr -5
-RED cd -10
-RED sa 7
-RED mx -4
-RED un -7
-RED ur -7
-RED jt -3
-RED bt -8
-RED dz 5
-RED hq 4
-RED yz -4
-RED fw -6
-REVERSAL
-RED dt -3
-RED nz -1
-REVERSAL
-RED oa -2
-RED mk -5
-RED bh 2
-RED xt 1
-REVERSAL
-RED sb -10
-REVERSAL
-RED hh 9
-RED rc -6
-RED sw 9
-RED rl 3
-RED lr 1
-RED js -9
-RED az 1
-RED vi -1
-REVERSAL
-RED bg -10
-REVERSAL
-RED ca 1
-RED nv 3
-RED tv 3
-RED ci -2
-RED kd 8
-REVERSAL
-RED zc -3
-BLUE 5
-REVERSAL
-REVERSAL
-LIGHT 8
+MAXSIZE 100
+RED Abj 37
+RED b 128
+RED c -10
+RED d -299
+RED e 189
+RED n 128
+RED l 210
+RED j -192
+RED u 120
+RED t 12
+RED aa 210
+RED bc -21
+RED jk -189
+RED hu -890
+RED nn -70
+RED mm -100
+RED ua 121
+RED kkk -109
+RED iii -101
+RED nshs -101
+RED hq 91
+RED hw 112
+RED xs -23
+RED xc -190
+RED jjjjj -900
+RED bbbbb -210
+RED llala -999
+RED nvcsm 292
+RED ttu 281
+RED ioi -9181
+RED shs -12
+RED nsns -800
+RED jsjs 1000
+LIGHT 2
+UNLIMITED_VOID
