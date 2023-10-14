@@ -205,12 +205,9 @@ public:
 		if (head == nullptr)
 		{
 			return;
-		}													// ok
-		if (head->next == nullptr && head->prev == nullptr) // ok
+		}																						 // ok
+		if (head->next == nullptr && head->prev == nullptr || (head == table && sizeTable == 1)) // ok
 		{
-			customer *temp = head;
-			head = head->next;
-			delete temp;
 			delete head;
 			head = nullptr;
 			if (isQueue)
@@ -617,21 +614,14 @@ public:
 			swapCustomer(findCustomer(table, getCustomer(headNeg, i)->name), findCustomer(table, getCustomer(headNeg, sizeNeg - 1 - i)->name));
 		}
 
-		// free headPos and headNeg
 		while (headPos != nullptr)
 		{
-			customer *temp = headPos;
-			headPos = headPos->next;
-			delete temp;
+			remove(headPos, nullptr);
 		}
-		delete headPos;
 		while (headNeg != nullptr)
 		{
-			customer *temp = headNeg;
-			headNeg = headNeg->next;
-			delete temp;
+			remove(headNeg, nullptr);
 		}
-		delete headNeg;
 
 		temp = table;
 		while (1)
@@ -919,30 +909,19 @@ public:
 			delete temp;
 		}
 		delete table;
+		sizeTable = 0;
 		cerr << "deleted table \n";
+
 		while (queue != nullptr)
-		{
-			customer *temp = queue;
-			queue = queue->next;
-			delete temp;
-		}
-		delete queue;
+			remove(queue, nullptr, true);
 		cerr << "deleted queue \n";
+
 		while (queueOrder != nullptr)
-		{
-			customer *temp = queueOrder;
-			queueOrder = queueOrder->next;
-			delete temp;
-		}
-		delete queueOrder;
+			remove(queueOrder, nullptr);
 		cerr << "deleted queueOrder \n";
+
 		while (recent != nullptr)
-		{
-			customer *temp = recent;
-			recent = recent->next;
-			delete temp;
-		}
-		delete recent;
+			remove(recent, nullptr);
 		cerr << "deleted recent \n";
 	}
 };

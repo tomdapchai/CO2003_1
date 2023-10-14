@@ -6,31 +6,5 @@ RED d -299
 RED e 189
 RED n 128
 RED l 210
-RED j -192
-RED u 120
-RED t 12
-RED aa 210
-RED bc -21
-RED jk -189
-RED hu -890
-RED nn -70
-RED mm -100
-RED ua 121
-RED kkk -109
-RED iii -101
-RED nshs -101
-RED hq 91
-RED hw 112
-RED xs -23
-RED xc -190
-RED jjjjj -900
-RED bbbbb -210
-RED llala -999
-RED nvcsm 292
-RED ttu 281
-RED ioi -9181
-RED shs -12
-RED nsns -800
-RED jsjs 1000
+REVERSAL
 LIGHT 2
-UNLIMITED_VOID
