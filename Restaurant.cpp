@@ -373,10 +373,8 @@ public:
 		one->prev = tempTwoPrev;
 		one->next = tempTwoNext;
 
-		if (head1)
-			queue = two;
-		if (head2)
-			queue = one;
+		if (head1 || head2)
+			queue = head1 ? two : one;
 	}
 
 	customer *getCustomer(customer *head, int index, bool isQueue = false)
