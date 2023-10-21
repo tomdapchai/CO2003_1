@@ -3,10 +3,8 @@
 class imp_res : public Restaurant
 {
 public:
-	customer *table;	  // Doubly circular linked list represents the table, always point to the most recent changed position.
-	customer *queue;	  // Doubly linked list presents the queue, always points to head of the queue.
-	customer *recent;	  // Doubly linked list present the recent customers, can be used as queue, always point to the head.
-	customer *queueOrder; // Store the order of customers in queue
+	customer *table; // Doubly circular linked list represents the table, always point to the most recent changed position.
+	customer *queue; // Doubly linked list presents the queue, always points to head of the queue.
 	customer *resOrder;
 	int sizeTable = 0;
 	int sizeQueue = 0;
@@ -24,8 +22,6 @@ public:
 	{
 		table = nullptr;
 		queue = nullptr;
-		recent = nullptr;
-		queueOrder = nullptr;
 		resOrder = nullptr;
 	};
 
@@ -90,7 +86,6 @@ public:
 			table = new customer(name, energy, nullptr, nullptr);
 			break;
 		}
-		add(recent, name, energy); // leak goes here - indirectly and definetely
 		++sizeTable;
 	}
 
@@ -128,7 +123,7 @@ public:
 
 		if (sizeTable < MAXSIZE / 2)
 		{
-			if (energy >= table->energy) 
+			if (energy >= table->energy)
 				addTable(name, energy, CLOCKWISE);
 			else
 				addTable(name, energy, ANTICLOCKWISE);
@@ -167,7 +162,7 @@ public:
 			else
 			{
 				add(queue, name, energy, true); // leak goes here - directly (allocate but not free enough)
-				add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
+				// add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
 				add(resOrder, name, energy);
 			}
 		}
@@ -202,6 +197,16 @@ public:
 	customer *findCustomer(customer *head, string name)
 	{
 		customer *temp = head;
+		if (head == table)
+		{
+			for (int i = 0; i < sizeTable; i++)
+			{
+				if (temp->name == name)
+					return temp;
+				temp = temp->next;
+			}
+			return nullptr;
+		}
 		while (temp != nullptr && temp->name != name)
 		{
 			temp = temp->next;
@@ -246,7 +251,7 @@ public:
 				r->next->prev = r->prev;
 				--sizeTable;
 			}
-			else // queue or recent or queueOrder
+			else // queue or recent or queueOrder or resOrder
 			{
 				if (r->next == nullptr) // r = tail
 				{
@@ -285,19 +290,11 @@ public:
 			delete table;
 			table = nullptr;
 			sizeTable = 0;
-			while (recent != nullptr)
-			{
-				customer *temp = recent;
-				recent = recent->next;
-				delete temp;
-			}
-			delete recent;
-			recent = nullptr;
 
 			while (sizeTable < MAXSIZE && queue != nullptr)
 			{
 				RED(queue->name, queue->energy);
-				remove(queueOrder, findCustomer(queueOrder, queue->name));
+				// remove(queueOrder, findCustomer(queueOrder, queue->name));
 				remove(queue, nullptr, true);
 			}
 			return;
@@ -307,7 +304,8 @@ public:
 		{
 			/* customer *removePtr = findCustomer(table, recent->name); */
 			customer *temp = resOrder;
-			while (findCustomer(table, temp->name) == nullptr) {
+			while (findCustomer(table, temp->name) == nullptr)
+			{
 				temp = temp->next;
 			}
 			customer *removePtr = findCustomer(table, temp->name);
@@ -319,10 +317,11 @@ public:
 			remove(table, removePtr);
 
 			remove(resOrder, temp);
-			remove(recent);
+			// remove(recent);
 		}
 
 		customer *temp = table;
+		cout << "table \n";
 		while (1)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -337,7 +336,7 @@ public:
 		while (sizeTable < MAXSIZE && queue != nullptr)
 		{
 			RED(queue->name, queue->energy); // leak goes here - definitely
-			remove(queueOrder, findCustomer(queueOrder, queue->name));
+			/* remove(queueOrder, findCustomer(queueOrder, queue->name)); */
 			remove(queue, nullptr, true);
 		}
 
@@ -358,9 +357,8 @@ public:
 			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
-		// print recent
-		cerr << "Recent\n";
-		temp = recent;
+		cerr << "resOrder\n";
+		temp = resOrder;
 		while (temp != nullptr)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -536,8 +534,8 @@ public:
 			temp = temp->next;
 		}
 
-		cerr << "queueOrder \n";
-		temp = queueOrder;
+		cerr << "resOrder\n";
+		temp = resOrder;
 		while (temp != nullptr)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -563,17 +561,9 @@ public:
 			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
-		// print recent
-		cerr << "Recent\n";
-		temp = recent;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-		// print queueOrder
-		cerr << "queueOrder \n";
-		temp = queueOrder;
+
+		cerr << "resOrder\n";
+		temp = resOrder;
 		while (temp != nullptr)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -788,7 +778,7 @@ public:
 				temp = temp->next;
 			}
 			// Print the removed customers
-			temp = queueOrder;
+			temp = resOrder;
 			while (temp->next != nullptr)
 				temp = temp->next;
 			// temp: tail of queue, most recent get in the restaurant
@@ -797,41 +787,43 @@ public:
 			{
 				customer *tempTemp = temp;
 				temp = temp->prev;
-				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+				if (findCustomer(queue, tempTemp->name) != nullptr)
 				{
-					tempTemp->print();
-					string Name = tempTemp->name;
-					remove(queueOrder, tempTemp);
-					remove(queue, findCustomer(queue, Name), true);
+					if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+					{
+						tempTemp->print();
+						remove(queue, findCustomer(queue, tempTemp->name), true);
+						remove(resOrder, tempTemp);
+					}
 				}
 			}
 		}
 
 		cerr << "table removing \n";
-		temp = recent;
+		temp = resOrder;
 		while (temp->next != nullptr)
 			temp = temp->next;
 		// temp : tail = most recent get in the table
 		// Start removing in table and recent
 		while (temp != nullptr)
 		{
-			if (ePos >= eNeg ? temp->energy < 0 : temp->energy > 0)
+			customer *tempTemp = temp;
+			temp = temp->prev;
+			if (findCustomer(table, tempTemp->name) != nullptr)
 			{
-				temp->print();
-				remove(table, findCustomer(table, temp->name));
-				customer *tempTemp = temp;
-				temp = temp->prev;
-				remove(recent, tempTemp);
+				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+				{
+					tempTemp->print();
+					remove(table, findCustomer(table, tempTemp->name));
+					remove(resOrder, tempTemp);
+				}
 			}
-			else
-				temp = temp->prev;
 		}
 
 		// Add customer from queue
 		while (sizeTable < MAXSIZE && queue != nullptr)
 		{
 			RED(queue->name, queue->energy);
-			remove(queueOrder, findCustomer(queueOrder, queue->name));
 			remove(queue, nullptr, true);
 		}
 
@@ -852,16 +844,9 @@ public:
 			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
-		// print recent
-		cerr << "Recent\n";
-		temp = recent;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-		cerr << "queueOrder \n";
-		temp = queueOrder;
+
+		cerr << "resOrder\n";
+		temp = resOrder;
 		while (temp != nullptr)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -934,12 +919,8 @@ public:
 			remove(queue, nullptr, true);
 		cerr << "deleted queue \n";
 
-		while (queueOrder != nullptr)
-			remove(queueOrder, nullptr);
-		cerr << "deleted queueOrder \n";
-
-		while (recent != nullptr)
-			remove(recent, nullptr);
-		cerr << "deleted recent \n";
+		while (resOrder != nullptr)
+			remove(resOrder, nullptr);
+		cerr << "deleted resOrder \n";
 	}
 };
