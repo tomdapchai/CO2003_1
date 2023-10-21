@@ -91,7 +91,6 @@ public:
 
 	void RED(string name, int energy)
 	{
-		cerr << "RED check \n";
 		if (energy == 0 || MAXSIZE == 0)
 			return;
 		if (table == nullptr)
@@ -165,32 +164,6 @@ public:
 				// add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
 				add(resOrder, name, energy);
 			}
-		}
-		// print table
-		cerr << "Table\n";
-		temp = table;
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-		// print queue
-		cerr << "Queue\n";
-		temp = queue;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-		// print recent
-		cerr << "resOrder\n";
-		temp = resOrder;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
 		}
 	}
 
@@ -273,7 +246,6 @@ public:
 
 	void BLUE(int num)
 	{
-		cerr << "BLUE check \n";
 		if (num == 0)
 			return;
 
@@ -320,16 +292,6 @@ public:
 			// remove(recent);
 		}
 
-		customer *temp = table;
-		cout << "table \n";
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-
 		if (sizeQueue == 0)
 			return;
 
@@ -338,31 +300,6 @@ public:
 			RED(queue->name, queue->energy); // leak goes here - definitely
 			/* remove(queueOrder, findCustomer(queueOrder, queue->name)); */
 			remove(queue, nullptr, true);
-		}
-
-		cerr << "Table\n";
-		temp = table;
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-		// print queue
-		cerr << "Queue\n";
-		temp = queue;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-		cerr << "resOrder\n";
-		temp = resOrder;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
 		}
 	}
 
@@ -446,14 +383,12 @@ public:
 	{
 		if (head == nullptr)
 		{
-			cerr << "no head \n";
 			return nullptr;
 		}
 		if (isQueue)
 		{
 			if (index < 0 || index >= sizeQueue)
 			{
-				cerr << index << " out of index";
 				return nullptr;
 			}
 		}
@@ -465,8 +400,6 @@ public:
 
 	void PURPLE()
 	{
-		cerr << "========================================================= \n";
-		cerr << "PURPLE check \n";
 		if (queue == nullptr || queue->next == nullptr)
 			return;
 		int N = 0;
@@ -525,8 +458,6 @@ public:
 			gap /= 2;
 		}
 
-		cerr << N << endl;
-
 		temp = queue;
 		while (temp != nullptr)
 		{
@@ -534,45 +465,10 @@ public:
 			temp = temp->next;
 		}
 
-		cerr << "resOrder\n";
-		temp = resOrder;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-
 		BLUE(N % MAXSIZE); // leak goes here - definitely, same block as line 328
-
-		cerr << "Table\n";
-		temp = table;
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-		// print queue
-		cerr << "Queue\n";
-		temp = queue;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-
-		cerr << "resOrder\n";
-		temp = resOrder;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
 	}
 	void REVERSAL()
 	{
-		cerr << "REVERSAL check \n";
 		if (table == nullptr || table->prev == nullptr)
 			return;
 		// split into two part: positive energy and negative energy, reverse each part.
@@ -630,20 +526,10 @@ public:
 		{
 			remove(headNeg, nullptr);
 		}
-
-		temp = table;
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
 	}
 
 	void UNLIMITED_VOID()
 	{
-		cerr << "UNLIMITED VOID check \n";
 		if (sizeTable < 4)
 			return;
 		if (sizeTable == 4)
@@ -694,7 +580,6 @@ public:
 			{
 				if ((tempSum < sum) || ((tempSum == sum) && (tempLength >= length)))
 				{
-					cerr << tempSum << " " << sum << endl;
 					sum = tempSum;
 					length = tempLength;
 					Name = temp->name;
@@ -710,7 +595,6 @@ public:
 				break;
 		}
 
-		// print
 		temp = findCustomer(table, Name);
 		string minName = Name;
 		int minEnergy = __INT32_MAX__;
@@ -725,8 +609,6 @@ public:
 			}
 			temp = temp->next;
 		}
-
-		cerr << sum << endl;
 
 		temp = findCustomer(table, minName);
 
@@ -748,7 +630,6 @@ public:
 
 	void DOMAIN_EXPANSION()
 	{
-		cerr << "DOMAIN EXPANSION check \n";
 		if (table == nullptr || table->next == nullptr)
 			return;
 		int ePos = 0;
@@ -767,7 +648,6 @@ public:
 		}
 		if (queue != nullptr)
 		{
-			cerr << "queue removing \n";
 			temp = queue;
 			while (temp != nullptr)
 			{
@@ -799,7 +679,6 @@ public:
 			}
 		}
 
-		cerr << "table removing \n";
 		temp = resOrder;
 		while (temp->next != nullptr)
 			temp = temp->next;
@@ -826,36 +705,9 @@ public:
 			RED(queue->name, queue->energy);
 			remove(queue, nullptr, true);
 		}
-
-		cerr << "Table\n";
-		temp = table;
-		while (1)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-			if (temp == table)
-				break;
-		}
-		// print queue
-		cerr << "Queue\n";
-		temp = queue;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-
-		cerr << "resOrder\n";
-		temp = resOrder;
-		while (temp != nullptr)
-		{
-			cerr << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
 	}
 	void LIGHT(int num)
 	{
-		cerr << "LIGHT check \n";
 		if (num != 0)
 		{
 			if (table == nullptr)
@@ -913,14 +765,11 @@ public:
 		}
 		delete table;
 		sizeTable = 0;
-		cerr << "deleted table \n";
 
 		while (queue != nullptr)
 			remove(queue, nullptr, true);
-		cerr << "deleted queue \n";
 
 		while (resOrder != nullptr)
 			remove(resOrder, nullptr);
-		cerr << "deleted resOrder \n";
 	}
 };
