@@ -7,6 +7,7 @@ public:
 	customer *queue;	  // Doubly linked list presents the queue, always points to head of the queue.
 	customer *recent;	  // Doubly linked list present the recent customers, can be used as queue, always point to the head.
 	customer *queueOrder; // Store the order of customers in queue
+	customer *resOrder;
 	int sizeTable = 0;
 	int sizeQueue = 0;
 	enum Direction
@@ -25,6 +26,7 @@ public:
 		queue = nullptr;
 		recent = nullptr;
 		queueOrder = nullptr;
+		resOrder = nullptr;
 	};
 
 	void add(customer *&head, string name, int energy, bool isQueue = false)
@@ -100,6 +102,7 @@ public:
 		if (table == nullptr)
 		{
 			addTable(name, energy);
+			add(resOrder, name, energy);
 			return;
 		}
 		customer *temp = table;
@@ -125,10 +128,12 @@ public:
 
 		if (sizeTable < MAXSIZE / 2)
 		{
-			if (energy >= table->energy)
+			if (energy >= table->energy) 
 				addTable(name, energy, CLOCKWISE);
 			else
 				addTable(name, energy, ANTICLOCKWISE);
+			if (findCustomer(resOrder, name) == nullptr)
+				add(resOrder, name, energy);
 		}
 		else if ((sizeTable >= MAXSIZE / 2) && sizeTable < MAXSIZE)
 		{
@@ -151,6 +156,9 @@ public:
 				addTable(name, energy, ANTICLOCKWISE);
 			else
 				addTable(name, energy, CLOCKWISE); // leak goes here - indirectly and definitely
+
+			if (findCustomer(resOrder, name) == nullptr)
+				add(resOrder, name, energy);
 		}
 		else
 		{
@@ -160,6 +168,7 @@ public:
 			{
 				add(queue, name, energy, true); // leak goes here - directly (allocate but not free enough)
 				add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
+				add(resOrder, name, energy);
 			}
 		}
 		// print table
@@ -181,8 +190,8 @@ public:
 			temp = temp->next;
 		}
 		// print recent
-		cerr << "Recent\n";
-		temp = recent;
+		cerr << "resOrder\n";
+		temp = resOrder;
 		while (temp != nullptr)
 		{
 			cerr << temp->name << " " << temp->energy << endl;
@@ -193,7 +202,7 @@ public:
 	customer *findCustomer(customer *head, string name)
 	{
 		customer *temp = head;
-		while (temp->name != name)
+		while (temp != nullptr && temp->name != name)
 		{
 			temp = temp->next;
 		}
@@ -265,9 +274,11 @@ public:
 
 		if (num >= sizeTable)
 		{
+
 			for (int i = 0; i < sizeTable - 1; i++)
 			{
 				customer *temp = table;
+				remove(resOrder, findCustomer(resOrder, temp->name));
 				table = table->next;
 				delete temp;
 			}
@@ -294,13 +305,20 @@ public:
 
 		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
 		{
-			customer *removePtr = findCustomer(table, recent->name);
+			/* customer *removePtr = findCustomer(table, recent->name); */
+			customer *temp = resOrder;
+			while (findCustomer(table, temp->name) == nullptr) {
+				temp = temp->next;
+			}
+			customer *removePtr = findCustomer(table, temp->name);
 			// locate where table points to
 			if (removePtr->energy > 0)
 				table = removePtr->next;
 			else
 				table = removePtr->prev;
 			remove(table, removePtr);
+
+			remove(resOrder, temp);
 			remove(recent);
 		}
 
@@ -484,14 +502,14 @@ public:
 					{
 						int pos1Origin = 0, pos2Origin = 0;
 
-						customer *i = queueOrder;
+						customer *i = resOrder;
 						while (i->name != getCustomer(queue, j - gap, true)->name)
 						{
 							pos1Origin++;
 							i = i->next;
 						}
 
-						i = queueOrder;
+						i = resOrder;
 						while (i->name != getCustomer(queue, j, true)->name)
 						{
 							pos2Origin++;
