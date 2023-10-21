@@ -49,7 +49,7 @@ public:
 		switch (direction)
 		{
 		case CLOCKWISE:
-			if (table->next == nullptr)
+			if (table->next == table)
 			{
 				customer *newCus = new customer(name, energy, table, table);
 				table->next = newCus;
@@ -84,6 +84,8 @@ public:
 			break;
 		default:
 			table = new customer(name, energy, nullptr, nullptr);
+			table->next = table;
+			table->prev = table;
 			break;
 		}
 		++sizeTable;
@@ -192,8 +194,8 @@ public:
 		if (head == nullptr)
 		{
 			return;
-		}																						 // ok
-		if (head->next == nullptr && head->prev == nullptr || (head == table && sizeTable == 1)) // ok
+		}																						   // ok
+		if ((head->next == nullptr && head->prev == nullptr) || (head == table && sizeTable == 1)) // ok
 		{
 			delete head;
 			head = nullptr;
@@ -628,7 +630,7 @@ public:
 
 	void DOMAIN_EXPANSION()
 	{
-		if (table == nullptr || table->next == nullptr)
+		if (table == nullptr || table->next == table)
 			return;
 		int ePos = 0;
 		int eNeg = 0;
@@ -710,7 +712,7 @@ public:
 		{
 			if (table == nullptr)
 				return;
-			if (table->next == nullptr)
+			if (table->next == table)
 			{
 				table->print();
 				return;
