@@ -8,6 +8,7 @@ public:
 	customer *resOrder;
 	int sizeTable = 0;
 	int sizeQueue = 0;
+	int N = 0;
 	enum Direction
 	{
 		DEFAULT = 0,
@@ -91,84 +92,6 @@ public:
 		++sizeTable;
 	}
 
-	void RED(string name, int energy)
-	{
-		if (energy == 0 || MAXSIZE == 0)
-			return;
-		if (table == nullptr)
-		{
-			addTable(name, energy);
-			add(resOrder, name, energy);
-			return;
-		}
-		customer *temp = table;
-		while (1)
-		{
-			if (name == temp->name)
-				return;
-			temp = temp->next;
-			if (temp == table || temp == nullptr)
-				break;
-		}
-		// temp is currently table->prev or temp == nullptr
-		if (sizeTable >= MAXSIZE)
-		{
-			temp = queue;
-			while (temp != nullptr)
-			{
-				if (name == temp->name)
-					return;
-				temp = temp->next;
-			}
-		}
-
-		if (sizeTable < MAXSIZE / 2)
-		{
-			if (energy >= table->energy)
-				addTable(name, energy, CLOCKWISE);
-			else
-				addTable(name, energy, ANTICLOCKWISE);
-			if (findCustomer(resOrder, name) == nullptr)
-				add(resOrder, name, energy);
-		}
-		else if ((sizeTable >= MAXSIZE / 2) && sizeTable < MAXSIZE)
-		{
-			int absRES = 0;
-			int RES;
-			customer *temp = table;
-			while (1)
-			{
-				if (abs(energy - temp->energy) > absRES)
-				{
-					absRES = abs(energy - temp->energy);
-					RES = energy - temp->energy;
-					table = temp;
-				}
-				temp = temp->next;
-				if (temp == table)
-					break;
-			}
-			if (RES < 0)
-				addTable(name, energy, ANTICLOCKWISE);
-			else
-				addTable(name, energy, CLOCKWISE); // leak goes here - indirectly and definitely
-
-			if (findCustomer(resOrder, name) == nullptr)
-				add(resOrder, name, energy);
-		}
-		else
-		{
-			if (sizeQueue >= MAXSIZE)
-				return;
-			else
-			{
-				add(queue, name, energy, true); // leak goes here - directly (allocate but not free enough)
-				// add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
-				add(resOrder, name, energy);
-			}
-		}
-	}
-
 	customer *findCustomer(customer *head, string name)
 	{
 		customer *temp = head;
@@ -243,65 +166,6 @@ public:
 			}
 			delete r;
 			r = nullptr;
-		}
-	}
-
-	void BLUE(int num)
-	{
-		if (num == 0)
-			return;
-
-		if (num >= sizeTable)
-		{
-
-			for (int i = 0; i < sizeTable - 1; i++)
-			{
-				customer *temp = table;
-				remove(resOrder, findCustomer(resOrder, temp->name));
-				table = table->next;
-				delete temp;
-			}
-			delete table;
-			table = nullptr;
-			sizeTable = 0;
-
-			while (sizeTable < MAXSIZE && queue != nullptr)
-			{
-				RED(queue->name, queue->energy);
-				// remove(queueOrder, findCustomer(queueOrder, queue->name));
-				remove(queue, nullptr, true);
-			}
-			return;
-		}
-
-		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
-		{
-			/* customer *removePtr = findCustomer(table, recent->name); */
-			customer *temp = resOrder;
-			while (findCustomer(table, temp->name) == nullptr)
-			{
-				temp = temp->next;
-			}
-			customer *removePtr = findCustomer(table, temp->name);
-			// locate where table points to
-			if (removePtr->energy > 0)
-				table = removePtr->next;
-			else
-				table = removePtr->prev;
-			remove(table, removePtr);
-
-			remove(resOrder, temp);
-			// remove(recent);
-		}
-
-		if (sizeQueue == 0)
-			return;
-
-		while (sizeTable < MAXSIZE && queue != nullptr)
-		{
-			RED(queue->name, queue->energy); // leak goes here - definitely
-			/* remove(queueOrder, findCustomer(queueOrder, queue->name)); */
-			remove(queue, nullptr, true);
 		}
 	}
 
@@ -398,35 +262,244 @@ public:
 		return temp;
 	}
 
+	void RED(string name, int energy)
+	{
+		if (energy == 0 || MAXSIZE == 0)
+			return;
+		if (table == nullptr)
+		{
+			addTable(name, energy);
+			add(resOrder, name, energy);
+			return;
+		}
+		customer *temp = table;
+		while (1)
+		{
+			if (name == temp->name)
+				return;
+			temp = temp->next;
+			if (temp == table || temp == nullptr)
+				break;
+		}
+		// temp is currently table->prev or temp == nullptr
+		if (sizeTable >= MAXSIZE)
+		{
+			temp = queue;
+			while (temp != nullptr)
+			{
+				if (name == temp->name)
+					return;
+				temp = temp->next;
+			}
+		}
+
+		if (sizeTable < MAXSIZE / 2)
+		{
+			if (energy >= table->energy)
+				addTable(name, energy, CLOCKWISE);
+			else
+				addTable(name, energy, ANTICLOCKWISE);
+			if (findCustomer(resOrder, name) == nullptr)
+				add(resOrder, name, energy);
+		}
+		else if ((sizeTable >= MAXSIZE / 2) && sizeTable < MAXSIZE)
+		{
+			int absRES = 0;
+			int RES;
+			customer *temp = table;
+			while (1)
+			{
+				if (abs(energy - temp->energy) > absRES)
+				{
+					absRES = abs(energy - temp->energy);
+					RES = energy - temp->energy;
+					table = temp;
+				}
+				temp = temp->next;
+				if (temp == table)
+					break;
+			}
+			if (RES < 0)
+				addTable(name, energy, ANTICLOCKWISE);
+			else
+				addTable(name, energy, CLOCKWISE); // leak goes here - indirectly and definitely
+
+			if (findCustomer(resOrder, name) == nullptr)
+				add(resOrder, name, energy);
+		}
+		else
+		{
+			if (sizeQueue >= MAXSIZE)
+				return;
+			else
+			{
+				add(queue, name, energy, true); // leak goes here - directly (allocate but not free enough)
+				// add(queueOrder, name, energy);	// leak goes here - indirectly (cannot directly delete, because there is no pointer points to the memory)
+				add(resOrder, name, energy);
+			}
+		}
+	}
+
+	void BLUE(int num)
+	{
+		if (num == 0)
+			return;
+
+		if (num >= sizeTable)
+		{
+
+			for (int i = 0; i < sizeTable - 1; i++)
+			{
+				customer *temp = table;
+				remove(resOrder, findCustomer(resOrder, temp->name));
+				table = table->next;
+				delete temp;
+			}
+			delete table;
+			table = nullptr;
+			sizeTable = 0;
+
+			while (sizeTable < MAXSIZE && queue != nullptr)
+			{
+				RED(queue->name, queue->energy);
+				// remove(queueOrder, findCustomer(queueOrder, queue->name));
+				remove(queue, nullptr, true);
+			}
+			return;
+		}
+
+		for (int i = 0; i < num; i++) // remove recent got in table - delete in table - change table
+		{
+			/* customer *removePtr = findCustomer(table, recent->name); */
+			customer *temp = resOrder;
+			while (findCustomer(table, temp->name) == nullptr)
+			{
+				temp = temp->next;
+			}
+			customer *removePtr = findCustomer(table, temp->name);
+			// locate where table points to
+			if (removePtr->energy > 0)
+				table = removePtr->next;
+			else
+				table = removePtr->prev;
+			remove(table, removePtr);
+
+			remove(resOrder, temp);
+			// remove(recent);
+		}
+
+		if (sizeQueue == 0)
+			return;
+
+		while (sizeTable < MAXSIZE && queue != nullptr)
+		{
+			RED(queue->name, queue->energy);
+			remove(queue, nullptr, true);
+		}
+	}
+
+	void inssort(int n, int incr)
+	{
+		cout << incr << endl;
+		for (int i = incr; i < n; i += incr)
+		{
+			for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
+			{
+				if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy)) // swap
+				{
+					swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
+					N++;
+				}
+				else // equal value, check which one come first to swap
+				{
+					int pos1Origin = 0, pos2Origin = 0;
+
+					customer *i = resOrder;
+					while (i->name != getCustomer(queue, j - incr, true)->name)
+					{
+						pos1Origin++;
+						i = i->next;
+					}
+
+					i = resOrder;
+					while (i->name != getCustomer(queue, j, true)->name)
+					{
+						pos2Origin++;
+						i = i->next;
+					}
+
+					if (pos1Origin > pos2Origin)
+					{
+						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
+						N++;
+					}
+				}
+			}
+		}
+	}
+	void shellsort(int n)
+	{
+		N = 0;
+		for (int i = n / 2; i > 2; i /= 2) // while
+			for (int j = 0; j < i; j++)
+				inssort(n - j, i);
+		inssort(n, 1);
+	}
+
 	void PURPLE()
 	{
 		if (queue == nullptr || queue->next == nullptr)
 			return;
-		int N = 0;
 		int pos;
 		int largestEnergy = 0;
 		customer *temp = queue;
-		for (int i = 0; i < sizeQueue; i++)
+		while (temp != nullptr)
 		{
 			if (abs(temp->energy) >= largestEnergy)
+				largestEnergy = abs(temp->energy);
+			temp = temp->next;
+		}
+
+		temp = resOrder;
+		while (temp != nullptr)
+		{
+			if (abs(temp->energy) == largestEnergy && findCustomer(queue, temp->name))
 			{
-				largestEnergy = temp->energy;
+				customer *tempTemp = queue;
+				int i = 0;
+				while (tempTemp != findCustomer(queue, temp->name))
+				{
+					i++;
+					tempTemp = tempTemp->next;
+				}
 				pos = i;
 			}
 			temp = temp->next;
 		}
-		// Perform shell sort from positon 0 to pos on the queue.
 
-		int gap = (pos + 1) / 2;
-		while (gap > 0)
+		cout << "before \n";
+		temp = queue;
+		while (temp != nullptr)
 		{
-			for (int i = gap; i <= pos; i++)
+			cout << temp->name << " " << temp->energy << endl;
+			temp = temp->next;
+		}
+
+		cout << "\nbegin \n";
+		// Perform shell sort from positon 0 to pos on the queue.
+		shellsort(pos + 1);
+		/* N = 0;
+		int incr = pos / 2;
+		while (incr > 2)
+		{
+			for (int i = incr; i <= pos; i += incr)
 			{
-				for (int j = i; j >= gap && abs(getCustomer(queue, j - gap, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= gap)
+				for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
 				{
-					if (abs(getCustomer(queue, j - gap, true)->energy) < abs(getCustomer(queue, j, true)->energy))
+					if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy))
 					{
-						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
+						cout << getCustomer(queue, j, true)->name << " " << getCustomer(queue, j, true)->energy << " " << getCustomer(queue, j - incr, true)->name << " " << getCustomer(queue, j - incr, true)->energy << endl;
+						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
 						N++;
 					}
 					else
@@ -434,7 +507,7 @@ public:
 						int pos1Origin = 0, pos2Origin = 0;
 
 						customer *i = resOrder;
-						while (i->name != getCustomer(queue, j - gap, true)->name)
+						while (i->name != getCustomer(queue, j - incr, true)->name)
 						{
 							pos1Origin++;
 							i = i->next;
@@ -449,19 +522,25 @@ public:
 
 						if (pos1Origin > pos2Origin)
 						{
-							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - gap, true));
+							cout << getCustomer(queue, j, true)->name << " " << getCustomer(queue, j, true)->energy << " " << getCustomer(queue, j - incr, true)->name << " " << getCustomer(queue, j - incr, true)->energy << endl;
+
+							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
 							N++;
 						}
 					}
 				}
 			}
-			gap /= 2;
+			incr /= 2;
 		}
-
+		inssort(pos, 1); */
+		cout << endl;
+		cout << N << endl;
+		cout << endl;
+		cout << "after \n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			temp->print();
+			cout << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 
@@ -691,8 +770,19 @@ public:
 			if (findCustomer(table, tempTemp->name) != nullptr)
 			{
 				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
-				{
 					tempTemp->print();
+			}
+		}
+
+		temp = resOrder;
+		while (temp != nullptr)
+		{
+			customer *tempTemp = temp;
+			temp = temp->next;
+			if (findCustomer(table, tempTemp->name) != nullptr)
+			{
+				if (ePos >= eNeg ? tempTemp->energy < 0 : tempTemp->energy > 0)
+				{
 					remove(table, findCustomer(table, tempTemp->name));
 					remove(resOrder, tempTemp);
 				}
