@@ -398,52 +398,109 @@ public:
 		}
 	}
 
-	void inssort(int n, int incr)
+	void inssort(int idx, int n, int incr)
 	{
-		cout << incr << endl;
-		for (int i = incr; i < n; i += incr)
-		{
-			for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
+		if (incr > 1) {
+			customer *Temp = queue;
+			for (int i = 0; i < idx; i++) 
+				Temp = Temp->next;
+			cout << idx << " " << Temp->name << " " << Temp->energy << endl;
+			for (int i = incr; i < n; i += incr)
 			{
-				if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy)) // swap
+				for (int j = i; j >= incr && abs(getCustomer(Temp, j - incr, true)->energy) <= abs(getCustomer(Temp, j, true)->energy); j -= incr)
 				{
-					swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
-					N++;
-				}
-				else // equal value, check which one come first to swap
-				{
-					int pos1Origin = 0, pos2Origin = 0;
-
-					customer *i = resOrder;
-					while (i->name != getCustomer(queue, j - incr, true)->name)
+					if (abs(getCustomer(Temp, j - incr, true)->energy) < abs(getCustomer(Temp, j, true)->energy)) // swap
 					{
-						pos1Origin++;
-						i = i->next;
-					}
-
-					i = resOrder;
-					while (i->name != getCustomer(queue, j, true)->name)
-					{
-						pos2Origin++;
-						i = i->next;
-					}
-
-					if (pos1Origin > pos2Origin)
-					{
-						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
+						customer *one = getCustomer(Temp, j - incr);
+						customer *two = getCustomer(Temp, j);
+						bool head = false;
+						if (one == Temp)
+							head = true;
+						swapCustomer(one, two);
+						if (head)
+							Temp = two;
 						N++;
+					}
+					else // equal value, check which one come first to swap
+					{
+						int pos1Origin = 0, pos2Origin = 0;
+
+						customer *i = resOrder;
+						while (i->name != getCustomer(Temp, j - incr, true)->name)
+						{
+							pos1Origin++;
+							i = i->next;
+						}
+
+						i = resOrder;
+						while (i->name != getCustomer(Temp, j, true)->name)
+						{
+							pos2Origin++;
+							i = i->next;
+						}
+
+						if (pos1Origin > pos2Origin)
+						{
+							customer *one = getCustomer(Temp, j - incr);
+							customer *two = getCustomer(Temp, j);
+							bool head = false;
+							if (one == Temp)
+								head = true;
+							swapCustomer(one, two);
+							if (head)
+								Temp = two;
+							N++;
+						}
 					}
 				}
 			}
 		}
+		else {
+			for (int i = incr; i < n; i += incr)
+			{
+				for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
+				{
+					if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy)) // swap
+					{
+						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
+						N++;
+					}
+					else // equal value, check which one come first to swap
+					{
+						int pos1Origin = 0, pos2Origin = 0;
+
+						customer *i = resOrder;
+						while (i->name != getCustomer(queue, j - incr, true)->name)
+						{
+							pos1Origin++;
+							i = i->next;
+						}
+
+						i = resOrder;
+						while (i->name != getCustomer(queue, j, true)->name)
+						{
+							pos2Origin++;
+							i = i->next;
+						}
+
+						if (pos1Origin > pos2Origin)
+						{
+							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
+							N++;
+						}
+					}
+				}
+			}
+		}
+		
 	}
 	void shellsort(int n)
 	{
 		N = 0;
 		for (int i = n / 2; i > 2; i /= 2) // while
 			for (int j = 0; j < i; j++)
-				inssort(n - j, i);
-		inssort(n, 1);
+				inssort(j, n - j, i);
+		inssort(0, n, 1);
 	}
 
 	void PURPLE()
@@ -489,7 +546,7 @@ public:
 		// Perform shell sort from positon 0 to pos on the queue.
 		shellsort(pos + 1);
 		/* N = 0;
-		int incr = pos / 2;
+		int incr = (pos + 1) / 2;
 		while (incr > 2)
 		{
 			for (int i = incr; i <= pos; i += incr)
@@ -532,7 +589,7 @@ public:
 			}
 			incr /= 2;
 		}
-		inssort(pos, 1); */
+		inssort(0, pos, 1); */
 		cout << endl;
 		cout << N << endl;
 		cout << endl;
@@ -709,7 +766,7 @@ public:
 
 	void DOMAIN_EXPANSION()
 	{
-		if (table == nullptr || table->next == table)
+		if (sizeTable + sizeQueue <= 1)
 			return;
 		int ePos = 0;
 		int eNeg = 0;
