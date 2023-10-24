@@ -120,6 +120,8 @@ public:
 		}																						   // ok
 		if ((head->next == nullptr && head->prev == nullptr) || (head == table && sizeTable == 1)) // ok
 		{
+			if (head == table)
+				sizeTable = 0;
 			delete head;
 			head = nullptr;
 			if (isQueue)
@@ -347,7 +349,6 @@ public:
 
 		if (num >= sizeTable)
 		{
-
 			for (int i = 0; i < sizeTable - 1; i++)
 			{
 				customer *temp = table;
@@ -534,11 +535,11 @@ public:
 			temp = temp->next;
 		}
 
-		cout << "before \n";
+		cerr << "before \n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 
@@ -590,14 +591,14 @@ public:
 			incr /= 2;
 		}
 		inssort(0, pos, 1); */
-		cout << endl;
-		cout << N << endl;
-		cout << endl;
-		cout << "after \n";
+		cerr << endl;
+		cerr << N << endl;
+		cerr << endl;
+		cerr << "after \n";
 		temp = queue;
 		while (temp != nullptr)
 		{
-			cout << temp->name << " " << temp->energy << endl;
+			cerr << temp->name << " " << temp->energy << endl;
 			temp = temp->next;
 		}
 
@@ -904,17 +905,23 @@ public:
 	}
 	~imp_res()
 	{
-		for (int i = 0; i < sizeTable - 1; i++)
-		{
-			customer *temp = table;
-			table = table->next;
-			delete temp;
-		}
-		delete table;
+		/* customer *temp = table;
+		int count = 0;
+		while (1) {
+			count++;
+			temp = temp->next;
+			if (temp == table)
+				break;
+		} */
+		while (table != nullptr)
+			remove(table, table);
+			
 		sizeTable = 0;
 
 		while (queue != nullptr)
 			remove(queue, nullptr, true);
+
+		sizeQueue = 0;
 
 		while (resOrder != nullptr)
 			remove(resOrder, nullptr);
