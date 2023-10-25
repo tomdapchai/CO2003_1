@@ -569,12 +569,12 @@ public:
 			return;
 		if (sizeTable == 4)
 		{
-			customer *temp = table;
+			customer *temp = table->prev;
 			int minE = __INT32_MAX__;
 			int minP;
 			for (int i = 0; i < 4; i++)
 			{
-				if (temp->energy <= minE)
+				if (temp->energy < minE)
 				{
 					minE = temp->energy;
 					minP = i;
@@ -582,7 +582,7 @@ public:
 				temp = temp->next;
 			}
 
-			temp = table;
+			temp = table->prev;
 			for (int i = 0; i < minP; i++)
 				temp = temp->next;
 
@@ -669,7 +669,6 @@ public:
 			return;
 
 		int sum = 0;
-
 		customer *temp = resOrder;
 		while (temp != nullptr)
 		{
@@ -677,43 +676,36 @@ public:
 			temp = temp->next;
 		}
 
+		temp = resOrder;
+		while (temp->next != nullptr)
+			temp = temp->next;
+		while (temp != nullptr)
+		{
+			if (sum >= 0 ? temp->energy < 0 : temp->energy > 0)
+			{
+				temp->print();
+			}
+			temp = temp->prev;
+		}
+
 		if (queue != nullptr)
 		{
 			// Print the removed customers
 			temp = resOrder;
-			while (temp->next != nullptr)
-				temp = temp->next;
 			// temp: tail of queue, most recent get in the restaurant
 			// Start removing in queue
 			while (temp != nullptr)
 			{
 				customer *tempTemp = temp;
-				temp = temp->prev;
+				temp = temp->next;
 				if (findCustomer(queue, tempTemp->name) != nullptr)
 				{
 					if (sum >= 0 ? tempTemp->energy < 0 : tempTemp->energy > 0)
 					{
-						tempTemp->print();
 						remove(queue, findCustomer(queue, tempTemp->name), true);
 						remove(resOrder, tempTemp);
 					}
 				}
-			}
-		}
-
-		temp = resOrder;
-		while (temp->next != nullptr)
-			temp = temp->next;
-		// temp : tail = most recent get in the table
-		// Start removing in table and recent
-		while (temp != nullptr)
-		{
-			customer *tempTemp = temp;
-			temp = temp->prev;
-			if (findCustomer(table, tempTemp->name) != nullptr)
-			{
-				if (sum >= 0 ? tempTemp->energy < 0 : tempTemp->energy > 0)
-					tempTemp->print();
 			}
 		}
 
