@@ -117,8 +117,8 @@ public:
 		if (head == nullptr)
 		{
 			return;
-		}																						   // ok
-		if ((head->next == nullptr && head->prev == nullptr) || (head == table && sizeTable == 1)) // ok
+		} // ok
+		if ((head->next == nullptr && head->prev == nullptr) || (head == table && sizeTable == 1))
 		{
 			if (head == table)
 				sizeTable = 0;
@@ -169,7 +169,7 @@ public:
 		}
 	}
 
-	void swapCustomer(customer *one, customer *two)
+	void swapCustomer(customer *one, customer *two, customer *head = nullptr)
 	{ // use for swapping in shell sort or in table
 		if (one == two || (one == nullptr || two == nullptr) || one->name == two->name || (one->next == two && two->next == one))
 			return;
@@ -409,17 +409,44 @@ public:
 
 	void inssort(int idx, int n, int incr)
 	{
-		if (incr > 1)
+		customer *Temp = queue;
+		for (int i = 0; i < idx; i++)
+			Temp = Temp->next;
+		for (int i = incr; i < n; i += incr)
 		{
-			customer *Temp = queue;
-			for (int i = 0; i < idx; i++)
-				Temp = Temp->next;
-			cout << idx << " " << Temp->name << " " << Temp->energy << endl;
-			for (int i = incr; i < n; i += incr)
+			for (int j = i; j >= incr && abs(getCustomer(Temp, j - incr, true)->energy) <= abs(getCustomer(Temp, j, true)->energy); j -= incr)
 			{
-				for (int j = i; j >= incr && abs(getCustomer(Temp, j - incr, true)->energy) <= abs(getCustomer(Temp, j, true)->energy); j -= incr)
+				if (abs(getCustomer(Temp, j - incr, true)->energy) < abs(getCustomer(Temp, j, true)->energy)) // swap
 				{
-					if (abs(getCustomer(Temp, j - incr, true)->energy) < abs(getCustomer(Temp, j, true)->energy)) // swap
+					customer *one = getCustomer(Temp, j - incr);
+					customer *two = getCustomer(Temp, j);
+					bool head = false;
+					if (one == Temp)
+						head = true;
+					swapCustomer(one, two);
+					if (head)
+						Temp = two;
+					N++;
+				}
+				else // equal value, check which one come first to swap
+				{
+					int pos1Origin = 0, pos2Origin = 0;
+
+					customer *i = resOrder;
+					while (i->name != getCustomer(Temp, j - incr, true)->name)
+					{
+						pos1Origin++;
+						i = i->next;
+					}
+
+					i = resOrder;
+					while (i->name != getCustomer(Temp, j, true)->name)
+					{
+						pos2Origin++;
+						i = i->next;
+					}
+
+					if (pos1Origin > pos2Origin)
 					{
 						customer *one = getCustomer(Temp, j - incr);
 						customer *two = getCustomer(Temp, j);
@@ -431,75 +458,6 @@ public:
 							Temp = two;
 						N++;
 					}
-					else // equal value, check which one come first to swap
-					{
-						int pos1Origin = 0, pos2Origin = 0;
-
-						customer *i = resOrder;
-						while (i->name != getCustomer(Temp, j - incr, true)->name)
-						{
-							pos1Origin++;
-							i = i->next;
-						}
-
-						i = resOrder;
-						while (i->name != getCustomer(Temp, j, true)->name)
-						{
-							pos2Origin++;
-							i = i->next;
-						}
-
-						if (pos1Origin > pos2Origin)
-						{
-							customer *one = getCustomer(Temp, j - incr);
-							customer *two = getCustomer(Temp, j);
-							bool head = false;
-							if (one == Temp)
-								head = true;
-							swapCustomer(one, two);
-							if (head)
-								Temp = two;
-							N++;
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			for (int i = incr; i < n; i += incr)
-			{
-				for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
-				{
-					if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy)) // swap
-					{
-						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
-						N++;
-					}
-					else // equal value, check which one come first to swap
-					{
-						int pos1Origin = 0, pos2Origin = 0;
-
-						customer *i = resOrder;
-						while (i->name != getCustomer(queue, j - incr, true)->name)
-						{
-							pos1Origin++;
-							i = i->next;
-						}
-
-						i = resOrder;
-						while (i->name != getCustomer(queue, j, true)->name)
-						{
-							pos2Origin++;
-							i = i->next;
-						}
-
-						if (pos1Origin > pos2Origin)
-						{
-							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
-							N++;
-						}
-					}
 				}
 			}
 		}
@@ -507,7 +465,7 @@ public:
 	void shellsort(int n)
 	{
 		N = 0;
-		for (int i = n / 2; i > 2; i /= 2) // while
+		for (int i = n / 2; i > 2; i /= 2)
 			for (int j = 0; j < i; j++)
 				inssort(j, n - j, i);
 		inssort(0, n, 1);
@@ -545,51 +503,7 @@ public:
 		}
 		// Perform shell sort from positon 0 to pos on the queue.
 		shellsort(pos + 1);
-		/* N = 0;
-		int incr = (pos + 1) / 2;
-		while (incr > 2)
-		{
-			for (int i = incr; i <= pos; i += incr)
-			{
-				for (int j = i; j >= incr && abs(getCustomer(queue, j - incr, true)->energy) <= abs(getCustomer(queue, j, true)->energy); j -= incr)
-				{
-					if (abs(getCustomer(queue, j - incr, true)->energy) < abs(getCustomer(queue, j, true)->energy))
-					{
-						cout << getCustomer(queue, j, true)->name << " " << getCustomer(queue, j, true)->energy << " " << getCustomer(queue, j - incr, true)->name << " " << getCustomer(queue, j - incr, true)->energy << endl;
-						swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
-						N++;
-					}
-					else
-					{
-						int pos1Origin = 0, pos2Origin = 0;
 
-						customer *i = resOrder;
-						while (i->name != getCustomer(queue, j - incr, true)->name)
-						{
-							pos1Origin++;
-							i = i->next;
-						}
-
-						i = resOrder;
-						while (i->name != getCustomer(queue, j, true)->name)
-						{
-							pos2Origin++;
-							i = i->next;
-						}
-
-						if (pos1Origin > pos2Origin)
-						{
-							cout << getCustomer(queue, j, true)->name << " " << getCustomer(queue, j, true)->energy << " " << getCustomer(queue, j - incr, true)->name << " " << getCustomer(queue, j - incr, true)->energy << endl;
-
-							swapCustomer(getCustomer(queue, j, true), getCustomer(queue, j - incr, true));
-							N++;
-						}
-					}
-				}
-			}
-			incr /= 2;
-		}
-		inssort(0, pos, 1); */
 		BLUE(N % MAXSIZE); // leak goes here - definitely, same block as line 328
 	}
 	void REVERSAL()
@@ -644,13 +558,9 @@ public:
 		}
 
 		while (headPos != nullptr)
-		{
 			remove(headPos, nullptr);
-		}
 		while (headNeg != nullptr)
-		{
 			remove(headNeg, nullptr);
-		}
 	}
 
 	void UNLIMITED_VOID()
@@ -757,8 +667,7 @@ public:
 	{
 		if (sizeTable + sizeQueue <= 1)
 			return;
-		/* int ePos = 0;
-		int eNeg = 0; */
+
 		int sum = 0;
 
 		customer *temp = resOrder;
@@ -767,28 +676,9 @@ public:
 			sum += temp->energy;
 			temp = temp->next;
 		}
-		/* customer *temp = table;
-		while (1)
-		{
-			if (temp->energy > 0)
-				ePos += temp->energy;
-			else
-				eNeg += abs(temp->energy);
-			temp = temp->next;
-			if (temp == table)
-				break;
-		} */
+
 		if (queue != nullptr)
 		{
-			/* temp = queue;
-			while (temp != nullptr)
-			{
-				if (temp->energy > 0)
-					ePos += temp->energy;
-				else
-					eNeg += abs(temp->energy);
-				temp = temp->next;
-			} */
 			// Print the removed customers
 			temp = resOrder;
 			while (temp->next != nullptr)
@@ -853,7 +743,6 @@ public:
 	{
 		if (num != 0)
 		{
-			cout << "table====\n";
 			if (table == nullptr)
 				return;
 			if (table->next == table)
@@ -864,21 +753,11 @@ public:
 		}
 		else
 		{
-			cout << "no queue======== \n";
 			if (queue == nullptr)
 				return;
 		}
-		cout << "resOrder======================= \n";
-		customer *temp = resOrder;
-		while (temp != nullptr)
-		{
-			cout << temp->name << " " << temp->energy << endl;
-			temp = temp->next;
-		}
-		cout << "end================ \n";
 		if (num > 0)
 		{
-			cout << "table clockwise==================\n";
 			customer *temp = table;
 			while (1)
 			{
@@ -890,7 +769,6 @@ public:
 		}
 		else if (num == 0)
 		{
-			cout << "queue=====================\n";
 			customer *temp = queue;
 			while (temp != nullptr)
 			{
@@ -900,7 +778,6 @@ public:
 		}
 		else
 		{
-			cout << "table anticlockwise==============================\n";
 			customer *temp = table;
 			while (1)
 			{
@@ -916,12 +793,8 @@ public:
 		while (table != nullptr)
 			remove(table, table);
 
-		sizeTable = 0;
-
 		while (queue != nullptr)
 			remove(queue, nullptr, true);
-
-		sizeQueue = 0;
 
 		while (resOrder != nullptr)
 			remove(resOrder, nullptr);
