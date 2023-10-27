@@ -45,6 +45,7 @@ public:
 		if (isQueue)
 			++sizeQueue;
 	}
+
 	void addTable(string name, int energy, Direction direction = DEFAULT)
 	{
 		switch (direction)
@@ -262,6 +263,71 @@ public:
 		return temp;
 	}
 
+	void inssort(int idx, int n, int incr)
+	{
+		customer *Temp = queue;
+		for (int i = 0; i < idx; i++)
+			Temp = Temp->next;
+		for (int i = incr; i < n; i += incr)
+		{
+			for (int j = i; j >= incr && abs(getCustomer(Temp, j - incr, true)->energy) <= abs(getCustomer(Temp, j, true)->energy); j -= incr)
+			{
+				if (abs(getCustomer(Temp, j - incr, true)->energy) < abs(getCustomer(Temp, j, true)->energy)) // swap
+				{
+					customer *one = getCustomer(Temp, j - incr);
+					customer *two = getCustomer(Temp, j);
+					bool head = false;
+					if (one == Temp)
+						head = true;
+					swapCustomer(one, two);
+					if (head)
+						Temp = two;
+					N++;
+				}
+				else // equal value, check which one come first to swap
+				{
+					int pos1Origin = 0, pos2Origin = 0;
+
+					customer *i = resOrder;
+					while (i->name != getCustomer(Temp, j - incr, true)->name)
+					{
+						pos1Origin++;
+						i = i->next;
+					}
+
+					i = resOrder;
+					while (i->name != getCustomer(Temp, j, true)->name)
+					{
+						pos2Origin++;
+						i = i->next;
+					}
+
+					if (pos1Origin > pos2Origin)
+					{
+						customer *one = getCustomer(Temp, j - incr);
+						customer *two = getCustomer(Temp, j);
+						bool head = false;
+						if (one == Temp)
+							head = true;
+						swapCustomer(one, two);
+						if (head)
+							Temp = two;
+						N++;
+					}
+				}
+			}
+		}
+	}
+
+	void shellsort(int n)
+	{
+		N = 0;
+		for (int i = n / 2; i > 2; i /= 2)
+			for (int j = 0; j < i; j++)
+				inssort(j, n - j, i);
+		inssort(0, n, 1);
+	}
+
 	void RED(string name, int energy)
 	{
 		if (energy == 0 || MAXSIZE == 0)
@@ -407,70 +473,6 @@ public:
 		}
 	}
 
-	void inssort(int idx, int n, int incr)
-	{
-		customer *Temp = queue;
-		for (int i = 0; i < idx; i++)
-			Temp = Temp->next;
-		for (int i = incr; i < n; i += incr)
-		{
-			for (int j = i; j >= incr && abs(getCustomer(Temp, j - incr, true)->energy) <= abs(getCustomer(Temp, j, true)->energy); j -= incr)
-			{
-				if (abs(getCustomer(Temp, j - incr, true)->energy) < abs(getCustomer(Temp, j, true)->energy)) // swap
-				{
-					customer *one = getCustomer(Temp, j - incr);
-					customer *two = getCustomer(Temp, j);
-					bool head = false;
-					if (one == Temp)
-						head = true;
-					swapCustomer(one, two);
-					if (head)
-						Temp = two;
-					N++;
-				}
-				else // equal value, check which one come first to swap
-				{
-					int pos1Origin = 0, pos2Origin = 0;
-
-					customer *i = resOrder;
-					while (i->name != getCustomer(Temp, j - incr, true)->name)
-					{
-						pos1Origin++;
-						i = i->next;
-					}
-
-					i = resOrder;
-					while (i->name != getCustomer(Temp, j, true)->name)
-					{
-						pos2Origin++;
-						i = i->next;
-					}
-
-					if (pos1Origin > pos2Origin)
-					{
-						customer *one = getCustomer(Temp, j - incr);
-						customer *two = getCustomer(Temp, j);
-						bool head = false;
-						if (one == Temp)
-							head = true;
-						swapCustomer(one, two);
-						if (head)
-							Temp = two;
-						N++;
-					}
-				}
-			}
-		}
-	}
-	void shellsort(int n)
-	{
-		N = 0;
-		for (int i = n / 2; i > 2; i /= 2)
-			for (int j = 0; j < i; j++)
-				inssort(j, n - j, i);
-		inssort(0, n, 1);
-	}
-
 	void PURPLE()
 	{
 		if (queue == nullptr || queue->next == nullptr)
@@ -506,6 +508,7 @@ public:
 
 		BLUE(N % MAXSIZE); // leak goes here - definitely, same block as line 328
 	}
+
 	void REVERSAL()
 	{
 		if (sizeTable <= 2)
@@ -731,6 +734,7 @@ public:
 			remove(queue, nullptr, true);
 		}
 	}
+
 	void LIGHT(int num)
 	{
 		if (num != 0)
@@ -780,6 +784,7 @@ public:
 			}
 		}
 	}
+
 	~imp_res()
 	{
 		while (table != nullptr)
